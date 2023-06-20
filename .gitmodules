@@ -1,0 +1,10 @@
+[submodule "vendor/SFML"]
+	path = vendor/SFML
+	url = https://github.com/SFML/SFML.git
+[submodule "vendor/imgui"]
+	path = vendor/imgui
+	url = https://github.com/ocornut/imgui
+	branch = docking
+[submodule "vendor/imgui-sfml"]
+	path = vendor/imgui-sfml
+	url = https://github.com/SFML/imgui-sfml

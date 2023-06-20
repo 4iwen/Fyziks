@@ -1,9 +1,36 @@
-set(SOURCE_FILES
-        src/Demo.cpp)
+set(
+        SOURCE_FILES
+        src/Demo.cpp
+        src/App.cpp
+)
 
-add_executable(Demo
-        ${SOURCE_FILES})
+set(
+        IMGUI_SOURCE_FILES
+        ../${IMGUI_DIR}/imgui.cpp
+        ../${IMGUI_DIR}/imgui_draw.cpp
+        ../${IMGUI_DIR}/imgui_tables.cpp
+        ../${IMGUI_DIR}/imgui_widgets.cpp
+        ../${IMGUI_DIR}/imgui_demo.cpp
+        ../vendor/imgui-sfml/imgui-SFML.cpp
+)
 
-target_link_libraries(Demo PUBLIC
+include_directories(
+        vendor/SFML/include
+        vendor/imgui
+        vendor/imgui-sfml
+)
+
+add_executable(
+        Demo
+        ${SOURCE_FILES}
+        ${IMGUI_SOURCE_FILES}
+)
+
+target_link_libraries(
+        Demo PUBLIC
         Fyziks
-        ImGui-SFML::ImGui-SFML)
+        sfml-graphics
+        sfml-window
+        sfml-system
+        ImGui-SFML::ImGui-SFML
+)
