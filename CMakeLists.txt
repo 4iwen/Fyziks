@@ -16,7 +16,7 @@ add_subdirectory(Fyziks)
 if (FYZIKS_BUILD_DEMO)
     # dependencies
     set(IMGUI_DIR vendor/imgui)
-    set(SFML_DIR vendor/SFML)
+    set(SFML_DIR build/vendor/SFML)
 
     add_subdirectory(vendor/imgui-sfml)
     add_subdirectory(vendor/SFML)
