@@ -24,8 +24,8 @@ jobs:
     - name: Initialize submodules
       run: git submodule update --init --recursive
     
-    - name: Specify SFML build directory
-      run: echo "SFML_DIR=$/build/vendor/SFML" >> $GITHUB_ENV
+    - name: Install SFML package
+      run: sudo apt-get install libsfml-dev
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
