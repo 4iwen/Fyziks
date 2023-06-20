@@ -21,8 +21,8 @@ jobs:
     - name: Install dependencies
       run: |
           sudo apt update
-          sudo apt-get install ninja-build xorg-dev libxrandr-dev libxcursor-dev libudev-dev libopenal-dev libflac-dev libvorbis-dev libgl1-mesa-dev libegl1-mesa-dev libdrm-dev libgbm-dev xvfb fluxbox
-
+          sudo apt-get install libsfml-dev 
+          
     - name: Initialize submodules
       run: git submodule update --init --recursive
 
