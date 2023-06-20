@@ -25,7 +25,7 @@ jobs:
       run: git submodule update --init --recursive
       
     - name: Install dependencies of SFML
-      run: sudo apt-get install libx11-dev
+      run: sudo apt-get install libx11-dev libxrandr-dev libxcursor-dev
 
     - name: Configure CMake
       run: cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
