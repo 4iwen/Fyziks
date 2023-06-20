@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
           sudo apt update
-          sudo apt-get install libsfml-dev libxrandr-dev libxcursor-dev
+          sudo apt-get install libsfml-dev libxrandr-dev libxcursor-dev libudev-dev
           
     - name: Initialize submodules
       run: git submodule update --init --recursive
