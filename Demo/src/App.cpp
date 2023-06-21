@@ -1,43 +1,21 @@
 #include "App.h"
 
-void App::init() {
-    this->window = std::make_unique<sf::RenderWindow>(
-            sf::VideoMode(sf::Vector2u(1080, 640)),
-            "Fyziks Demo"
-    );
-}
-
 void App::run() {
-    if (!ImGui::SFML::Init(*window)) {
-        printf("Initializing ImGui with SFML failed!\n");
-        return;
-    }
-
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
+    std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
     sf::Clock deltaClock;
+
     while (window->isOpen()) {
-        sf::Event event{};
-        while (window->pollEvent(event)) {
-            ImGui::SFML::ProcessEvent(*window, event);
+        // handle events
+        window->handleEvents();
 
-            if (event.type == sf::Event::Closed)
-                window->close();
-        }
+        // *-*-*-*-*-*-* draw -*-*-*-*-*-*-*
+        ImGui::SFML::Update(*window->pWindow, deltaClock.restart());
 
+        window->drawUI();
+        // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-        ImGui::SFML::Update(*window, deltaClock.restart());
-
-        ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
-
-        ImGui::ShowDemoWindow();
-
+        // render
         window->clear(sf::Color(33, 33, 33));
-
-        ImGui::SFML::Render(*window);
-
-        window->display();
+        window->render();
     }
-
-    ImGui::SFML::Shutdown();
 }

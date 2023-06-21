@@ -12,7 +12,7 @@ set(
         ../${IMGUI_DIR}/imgui_widgets.cpp
         ../${IMGUI_DIR}/imgui_demo.cpp
         ../vendor/imgui-sfml/imgui-SFML.cpp
-)
+        src/Window.cpp src/Window.h)
 
 include_directories(
         vendor/SFML/include
