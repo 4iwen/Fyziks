@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef FYZIKS_SHARED
 #ifdef _WIN32
 #define PLATFORM_WINDOWS
 #endif
@@ -26,4 +27,7 @@
 #else
 #define FYZIKS_API
 #endif
+#endif
+#else
+#define FYZIKS_API
 #endif

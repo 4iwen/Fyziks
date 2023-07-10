@@ -18,9 +18,10 @@ set(
 )
 
 include_directories(
-        vendor/SFML/include
-        vendor/imgui
-        vendor/imgui-sfml
+        ${IMGUI_DIR}
+        ../Fyziks/include
+        ../vendor/SFML/include
+        ../vendor/imgui-sfml
 )
 
 add_executable(
@@ -29,9 +30,8 @@ add_executable(
         ${SOURCE_FILES}
         ${IMGUI_SOURCE_FILES}
 )
-
 target_link_libraries(
-        Demo PUBLIC
+        Demo PRIVATE
 
         Fyziks
         sfml-graphics

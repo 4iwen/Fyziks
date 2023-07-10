@@ -8,11 +8,9 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # options
-option(FYZIKS_BUILD_DEMO "Build Demo" ON)
+option(FYZIKS_BUILD_DEMO "Build demo" ON)
 option(FYZIKS_BUILD_DOCS "Build documentation" OFF)
-
-# include
-include_directories(Fyziks/include)
+option(FYZIKS_BUILD_SHARED "Build Fyziks as a shared library" ON)
 
 # library
 add_subdirectory(Fyziks)

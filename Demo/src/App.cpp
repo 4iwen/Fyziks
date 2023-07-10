@@ -1,7 +1,15 @@
-#include <cmath>
 #include "App.h"
 
+#include "Fyziks.h"
+#include "cstdio"
+
 void App::run() {
+    FyVec2 gravity;
+    printf("Gravity: %f, %f\n", gravity.x, gravity.y);
+    gravity.x = 0;
+    gravity.y = -9.81;
+    printf("Gravity: %f, %f\n", gravity.x, gravity.y);
+
     std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
     sf::Clock deltaClock;
 
