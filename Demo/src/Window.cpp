@@ -4,10 +4,7 @@
 
 Window::Window(std::string title, sf::Vector2u size) {
     this->pWindow = std::make_unique<sf::RenderWindow>(
-            sf::VideoMode(size.x, size.y),
-            title,
-            sf::Style::Default,
-            sf::ContextSettings(0, 0, 8)
+        sf::VideoMode(size.x, size.y), title, sf::Style::Default, sf::ContextSettings(0, 0, 8)
     );
 
     if (!ImGui::SFML::Init(*pWindow)) {
@@ -36,7 +33,7 @@ bool Window::isOpen() {
 }
 
 void Window::handleEvents() {
-    sf::Event event{};
+    sf::Event event {};
 
     while (pWindow->pollEvent(event)) {
         ImGui::SFML::ProcessEvent(*pWindow, event);
@@ -52,12 +49,14 @@ void Window::drawUI() {
     ImGui::Begin("Metrics");
     ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
     ImGui::Text("Frame time: %.2f ms", 1000.0f / ImGui::GetIO().Framerate);
-    static float values[90] = {0};
-    static int values_offset = 0;
-    values[values_offset] = 1000.0f / ImGui::GetIO().Framerate;
-    values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-    ImGui::PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset, nullptr, 0.0f, 100.0f,
-                     ImVec2(0, 80));
+    static float values[90]    = { 0 };
+    static int   values_offset = 0;
+    values[values_offset]      = 1000.0f / ImGui::GetIO().Framerate;
+    values_offset              = (values_offset + 1) % IM_ARRAYSIZE(values);
+    ImGui::PlotLines(
+        "Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset, nullptr, 0.0f, 100.0f,
+        ImVec2(0, 80)
+    );
     ImGui::End();
 
     ImGui::Begin("Examples");
@@ -197,13 +196,11 @@ void Window::drawLine(sf::Vector2f origin, float length, float angle, sf::Color 
     pWindow->draw(line);
 }
 
-void Window::drawTriangle(sf::Vector2f origin,
-                          sf::Vector2f point1,
-                          sf::Vector2f point2,
-                          sf::Vector2f point3,
-                          float angle,
-                          sf::Color color) {
-    drawPolygon(origin, {point1, point2, point3}, angle, color);
+void Window::drawTriangle(
+    sf::Vector2f origin, sf::Vector2f point1, sf::Vector2f point2, sf::Vector2f point3, float angle,
+    sf::Color color
+) {
+    drawPolygon(origin, { point1, point2, point3 }, angle, color);
 }
 
 void Window::drawRectangle(sf::Vector2f origin, sf::Vector2f size, float angle, sf::Color color) {
@@ -221,7 +218,9 @@ void Window::drawRectangle(sf::Vector2f origin, sf::Vector2f size, float angle, 
     pWindow->draw(rectangle);
 }
 
-void Window::drawPolygon(sf::Vector2f origin, std::vector<sf::Vector2f> vertices, float angle, sf::Color color) {
+void Window::drawPolygon(
+    sf::Vector2f origin, std::vector<sf::Vector2f> vertices, float angle, sf::Color color
+) {
     sf::ConvexShape polygon;
     polygon.setPointCount(vertices.size());
 
