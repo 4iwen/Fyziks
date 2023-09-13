@@ -1,4 +1,6 @@
+cmake_build_*/
 cmake-build-*/
 .idea/
 build/
 bin/
+compile_commands.json

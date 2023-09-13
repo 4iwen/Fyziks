@@ -1,81 +1,60 @@
+#include "SFML/Graphics/Color.hpp"
+#include <Fyziks/Math/Vec2.h>
 #include <SFML/Graphics.hpp>
+#include <array>
 #include <imgui-SFML.h>
 #include <imgui.h>
 #include <memory>
 
 class Window {
 public:
-    std::unique_ptr<sf::RenderWindow> pWindow;
+  std::unique_ptr<sf::RenderWindow> window;
+  const std::array<sf::Color, 16> colors = {
+      sf::Color(204, 36, 29),   // red fill
+      sf::Color(251, 73, 52),   // red outline
+      sf::Color(152, 151, 26),  // light green fill
+      sf::Color(184, 187, 38),  // light green outline
+      sf::Color(215, 153, 33),  // yellow fill
+      sf::Color(250, 189, 47),  // yellow outline
+      sf::Color(69, 133, 136),  // blue fill
+      sf::Color(131, 165, 152), // blue outline
+      sf::Color(177, 98, 134),  // purple fill
+      sf::Color(211, 134, 155), // purple outline
+      sf::Color(104, 157, 106), // dark green fill
+      sf::Color(142, 192, 124), // dark green outline
+      sf::Color(168, 153, 132), // white fill
+      sf::Color(235, 219, 178), // white outline
+      sf::Color(40, 40, 40),    // black
+      sf::Color(146, 131, 116)  // gray
+  };
 
-    const sf::Color shapeColor   = sf::Color(255, 0, 0);
-    const float     thickness    = 2.0f;
-    const int       fillAlpha    = 100;
-    const int       outlineAlpha = 255;
+  Window(std::string title, sf::Vector2u size);
 
-    Window(std::string title, sf::Vector2u size);
+  ~Window();
 
-    ~Window();
+  bool isOpen();
 
-    bool isOpen();
+  void handleEvents();
 
-    void handleEvents();
+  void clear(sf::Color color);
 
-    void clear(sf::Color color);
+  void render();
 
-    void render();
+  void drawUI();
 
-    void drawUI();
+  void drawPoint(fy::Vec2 pos, sf::Color color);
 
-    void drawShapeManipulator();
+  void drawLine(fy::Vec2 pos1, fy::Vec2 pos2, sf::Color color);
 
-    void drawPoint(sf::Vector2f, sf::Color color = sf::Color(255, 0, 0));
+  void drawTriangle(fy::Vec2 pos1, fy::Vec2 pos2, fy::Vec2 pos3,
+                    sf::Color outlineColor, sf::Color fillColor);
 
-    void drawLine(
-        sf::Vector2f origin, float length, float angle = 0.0f,
-        sf::Color color = sf::Color(255, 0, 0)
-    );
+  void drawRectangle(fy::Vec2 pos, fy::Vec2 size, sf::Color outlineColor,
+                     sf::Color fillColor);
 
-    void drawTriangle(
-        sf::Vector2f origin, sf::Vector2f point1, sf::Vector2f point2, sf::Vector2f point3,
-        float angle = 0.0f, sf::Color color = sf::Color(255, 0, 0)
-    );
+  void drawPolygon(std::vector<fy::Vec2> vertices, sf::Color outlineColor,
+                   sf::Color fillColor);
 
-    void drawRectangle(
-        sf::Vector2f origin, sf::Vector2f size, float angle = 0.0f,
-        sf::Color color = sf::Color(255, 0, 0)
-    );
-
-    void drawPolygon(
-        sf::Vector2f origin, std::vector<sf::Vector2f> vertices, float angle = 0.0f,
-        sf::Color color = sf::Color(255, 0, 0)
-    );
-
-    void drawCircle(
-        sf::Vector2f origin, float radius, float angle = 0.0f,
-        sf::Color color = sf::Color(255, 0, 0)
-    );
-
-    sf::Vector2f pointOrigin;
-
-    sf::Vector2f lineOrigin;
-    float        lineLength;
-    float        lineAngle;
-
-    sf::Vector2f triangleOrigin;
-    sf::Vector2f trianglePoint1;
-    sf::Vector2f trianglePoint2;
-    sf::Vector2f trianglePoint3;
-    float        triangleAngle;
-
-    sf::Vector2f rectangleOrigin;
-    sf::Vector2f rectangleSize;
-    float        rectangleAngle;
-
-    sf::Vector2f              polygonOrigin;
-    std::vector<sf::Vector2f> polygonVertices;
-    float                     polygonAngle;
-
-    sf::Vector2f circleOrigin;
-    float        circleRadius;
-    float        circleAngle;
+  void drawCircle(fy::Vec2 pos, float radius, sf::Color outlineColor,
+                  sf::Color fillColor);
 };

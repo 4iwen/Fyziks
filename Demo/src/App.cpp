@@ -1,60 +1,41 @@
 #include "App.h"
 
 #include "Fyziks.h"
-#include "cstdio"
+#include "Fyziks/Math/Vec2.h"
+#include <cstdio>
 
 void App::run() {
-    FyVec2 gravity;
-    printf("Gravity: %f, %f\n", gravity.x, gravity.y);
-    gravity.x = 0;
-    gravity.y = -9.81;
-    printf("Gravity: %f, %f\n", gravity.x, gravity.y);
+  fy::Vec2 gravity;
+  printf("Gravity: %f, %f\n", gravity.x, gravity.y);
+  gravity.x = 0;
+  gravity.y = -9.81;
+  printf("Gravity: %f, %f\n", gravity.x, gravity.y);
 
-    std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
-    sf::Clock deltaClock;
+  std::unique_ptr<Window> window =
+      std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
+  sf::Clock deltaClock;
 
-    while (window->isOpen()) {
-        // handle events
-        window->handleEvents();
+  while (window->isOpen()) {
+    // handle events
+    window->handleEvents();
+    // clear the window
+    window->clear(sf::Color(33, 33, 33));
 
-        window->clear(sf::Color(33, 33, 33));
+    // *-*-*-*-*-*-* draw -*-*-*-*-*-*-*
+    ImGui::SFML::Update(*window->window, deltaClock.restart());
+    // draw shapes
+    std::vector<fy::Vec2> polygonVertices = {
+        fy::Vec2(500, 500), fy::Vec2(600, 500), fy::Vec2(600, 600),
+        fy::Vec2(500, 600)};
+    window->drawPolygon(polygonVertices, window->colors[3], window->colors[2]);
+    window->drawLine(fy::Vec2(400, 200), fy::Vec2(500, 300), window->colors[1]);
 
-        // *-*-*-*-*-*-* draw -*-*-*-*-*-*-*
-        ImGui::SFML::Update(*window->pWindow, deltaClock.restart());
+    // draw imgui
+    window->drawUI();
+    // ImGui::ShowDemoWindow();
+    // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
-        window->drawPoint(window->pointOrigin, window->shapeColor);
-        window->drawLine(window->lineOrigin, window->lineLength, window->lineAngle, window->shapeColor);
-        window->drawTriangle(window->triangleOrigin, window->trianglePoint1, window->trianglePoint2,
-                             window->trianglePoint3, window->triangleAngle, window->shapeColor);
-        window->drawRectangle(window->rectangleOrigin, window->rectangleSize, window->rectangleAngle,
-                              window->shapeColor);
-        window->drawPolygon(window->polygonOrigin,
-                            {
-            sf::Vector2f(-50, 100),
-            sf::Vector2f(50, 100),
-            sf::Vector2f(100, 50),
-            sf::Vector2f(100, -50),
-            sf::Vector2f(50, -100),
-            sf::Vector2f(-50, -100),
-            /*
-                                    sf::Vector2f(1 * 100, 0 * 100),
-                                    sf::Vector2f(sqrt(2) / 2 * 100, sqrt(2) / 2 * 100),
-                                    sf::Vector2f(0 * 100, 1 * 100),
-                                    sf::Vector2f(-sqrt(2) / 2 * 100, sqrt(2) / 2 * 100),
-                                    sf::Vector2f(-1 * 100, 0 * 100),
-                                    sf::Vector2f(-sqrt(2) / 2 * 100, -sqrt(2) / 2 * 100),
-                                    sf::Vector2f(0 * 100, -1 * 100),,
-                                    sf::Vector2f(sqrt(2) / 2 * 100, -sqrt(2) / 2 * 100),*/
-                            },
-                            window->polygonAngle, window->shapeColor);
-        window->drawCircle(window->circleOrigin, window->circleRadius, window->circleAngle, window->shapeColor);
-
-        window->drawUI();
-        window->drawShapeManipulator();
-        //ImGui::ShowDemoWindow();
-        // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
-        // render
-        window->render();
-    }
+    // render
+    window->render();
+  }
 }

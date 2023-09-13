@@ -1,10 +1,9 @@
 #include "App.h"
 
-#include <memory>
-
+// entry point
 int main() {
-    std::unique_ptr<App> app = std::make_unique<App>();
-    app->run();
+  App app;   // create app
+  app.run(); // run it
 
-    return 0;
+  return 0;
 }
