@@ -1,5 +1,6 @@
 cmake_build_*/
 cmake-build-*/
+.cache/
 .idea/
 build/
 bin/
