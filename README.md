@@ -29,7 +29,7 @@ You can find the latest release on the [releases](https://github.com/4iwen/Fyzik
         - `brew install gcc`
 
 4. Run `build.sh` or `build.bat`
-5. Built files are located in the [bin/](bin/) folder
+5. Built files are located in the bin/ folder
 
 ### Usage
 
