@@ -6,7 +6,8 @@
 #include <vector>
 
 namespace fy {
-class FYZIKS_API World {
-  std::vector<Body> objects;
-};
-} // namespace fy
+    class FYZIKS_API World {
+    public:
+        std::vector<Body> objects;
+    };
+}

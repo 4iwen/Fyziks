@@ -2,8 +2,10 @@
 
 // entry point
 int main() {
-  App app;   // create app
-  app.run(); // run it
+    // create app
+    App app;
+    // run it
+    app.run();
 
-  return 0;
+    return 0;
 }

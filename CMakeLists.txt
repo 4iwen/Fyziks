@@ -10,19 +10,19 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # options
 option(FYZIKS_BUILD_DEMO "Build demo" ON)
-option(FYZIKS_BUILD_SHARED "Build Fyziks as a shared library" ON)
+option(FYZIKS_BUILD_SHARED "Build Fyziks as a shared library" OFF)
 
 # library
 add_subdirectory(Fyziks)
 
 # demo
-if(FYZIKS_BUILD_DEMO)
-  # dependencies
-  set(IMGUI_SFML_FIND_SFML OFF)
-  set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
+if (FYZIKS_BUILD_DEMO)
+    # dependencies
+    set(IMGUI_SFML_FIND_SFML OFF)
+    set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 
-  add_subdirectory(vendor/imgui-sfml)
-  add_subdirectory(vendor/SFML)
+    add_subdirectory(vendor/imgui-sfml)
+    add_subdirectory(vendor/SFML)
 
-  add_subdirectory(Demo)
-endif()
+    add_subdirectory(Demo)
+endif ()

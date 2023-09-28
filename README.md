@@ -2,21 +2,39 @@
 
 ## Features
 
+WIP
+
 ## Getting Started
 
-### Installation
+### Get yourself a copy
+
+#### Release
+
+You can find the latest release on the [releases](https://github.com/4iwen/Fyziks/releases) page
+
+#### Building
+
+1. Clone the repository recursively
+
+- `git clone https://github.com/4iwen/Fyziks --recursive`
+
+2. Install [CMake](https://cmake.org/)
+3. Install a C++ compiler of your choice
+
+- Windows
+    - [MinGW](https://mingw-w64.org/), [MSVC](https://visualstudio.microsoft.com/downloads/) (comes with Visual Studio)
+- Linux & macOS
+    - gcc
+        - `sudo apt install gcc`
+        - `brew install gcc`
+
+4. Run `build.sh` or `build.bat`
+5. Built files are located in the [bin/](bin/) folder
 
 ### Usage
-
-## Contributing
-
-Contributions to Fyziks are welcome! If you find any issues or have suggestions for improvements, please open an issue
-or submit a pull request on the [GitHub repository](https://www.github.com/4iwen/Fyziks).
 
 ## License
 
 Fyziks is licensed under the MIT License. See [LICENSE](LICENSE) for more information.
 
-## Acknowledgements
-
-Fyziks was inspired by [Box2D](https://box2d.org/), a 2D physics engine written in C++.
+*Inspired by [Box2D](https://box2d.org/).*
