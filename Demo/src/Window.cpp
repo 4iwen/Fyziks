@@ -3,6 +3,7 @@
 #include "SFML/System/Vector2.hpp"
 
 #include <cstdio>
+#include <cmath>
 
 Window::Window(std::string title, sf::Vector2u size) {
     this->window = std::make_unique<sf::RenderWindow>(
@@ -37,6 +38,10 @@ void Window::handleEvents() {
         if (event.type == sf::Event::Closed)
             window->close();
     }
+}
+
+void Window::setVsync(bool enabled) {
+    window->setVerticalSyncEnabled(enabled);
 }
 
 void Window::drawUI() {
@@ -105,8 +110,7 @@ void Window::drawUI() {
     ImGui::End();
 }
 
-void Window::drawRectangle(fy::Rectangle *rectangle) const {
-    sf::VertexArray lines(sf::LinesStrip, 5);
+void Window::drawRectangle(const fy::Rectangle *rectangle) const {
     fy::Mat2x2 rotation(rectangle->rotation);
     fy::Vec2 half(rectangle->width * 0.5f, rectangle->height * 0.5f);
 
@@ -115,7 +119,7 @@ void Window::drawRectangle(fy::Rectangle *rectangle) const {
     fy::Vec2 v3 = rectangle->position + rotation * fy::Vec2(half.x, half.y);
     fy::Vec2 v4 = rectangle->position + rotation * fy::Vec2(-half.x, half.y);
 
-    sf::Vertex rect[5] = {
+    sf::Vertex vertices[5] = {
             sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6]),
             sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[6]),
             sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[6]),
@@ -123,5 +127,54 @@ void Window::drawRectangle(fy::Rectangle *rectangle) const {
             sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6])
     };
 
-    window->draw(rect, 5, sf::LineStrip);
+    window->draw(vertices, 5, sf::LineStrip);
+}
+
+void Window::drawCircle(const fy::Circle *circle) const {
+    int segments = 18;
+    sf::Vertex vertices[segments + 2];
+    fy::Mat2x2 rotation(circle->rotation);
+    const float angleIncrement = 2 * M_PIf / static_cast<float>(segments);
+
+    for (int i = 0; i < segments + 1; i++) {
+        float angle = static_cast<float>(i) * angleIncrement;
+        fy::Vec2 point = circle->position + rotation * fy::Vec2(circle->radius * cosf(angle), circle->radius * sinf(angle));
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[6]);
+    }
+    vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), colors[6]);
+
+
+    window->draw(vertices, segments + 2, sf::LineStrip);
+}
+
+void Window::drawTriangle(const fy::Triangle *triangle) const {
+    fy::Mat2x2 rotation(triangle->rotation);
+
+    fy::Vec2 v1 = triangle->position + rotation * triangle->point1;
+    fy::Vec2 v2 = triangle->position + rotation * triangle->point2;
+    fy::Vec2 v3 = triangle->position + rotation * triangle->point3;
+
+    sf::Vertex vertices[4] = {
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6]),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[6]),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[6]),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6])
+    };
+
+    window->draw(vertices, 4, sf::LineStrip);
+}
+
+void Window::drawPolygon(const fy::Polygon *polygon) const {
+    unsigned long verticesCount = polygon->vertices.size();
+
+    sf::Vertex vertices[verticesCount + 1];
+    fy::Mat2x2 rotation(polygon->rotation);
+
+    for (int i = 0; i < verticesCount; i++) {
+        fy::Vec2 point = polygon->position + rotation * polygon->vertices[i];
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[6]);
+    }
+    vertices[verticesCount] = vertices[0];
+
+    window->draw(vertices, verticesCount + 1, sf::LineStrip);
 }

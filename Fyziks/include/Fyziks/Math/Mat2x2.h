@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Fyziks/Api.h>
+#include "Fyziks/Api.h"
 #include <cmath>
 
 namespace fy {
@@ -17,9 +17,9 @@ namespace fy {
             float cosValue = cosf(angle);
 
             r1c1 = cosValue;
-            r1c2 = -sinValue;
+            r1c2 = sinValue;
             r2c1 = sinValue;
-            r2c2 = cosValue;
+            r2c2 = -cosValue;
         }
     };
 

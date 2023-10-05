@@ -31,9 +31,17 @@ public:
 
     void clear(sf::Color color);
 
+    void setVsync(bool enabled);
+
     void render();
 
     void drawUI();
 
-    void drawRectangle(fy::Rectangle *rectangle) const;
+    void drawRectangle(const fy::Rectangle *rectangle) const;
+
+    void drawCircle(const fy::Circle *circle) const;
+
+    void drawTriangle(const fy::Triangle *triangle) const;
+
+    void drawPolygon(const fy::Polygon *polygon) const;
 };

@@ -12,3 +12,6 @@
 #include "Fyziks/World/Body.h"
 #include "Fyziks/World/World.h"
 #include "Fyziks/World/Rectangle.h"
+#include "Fyziks/World/Circle.h"
+#include "Fyziks/World/Polygon.h"
+#include "Fyziks/World/Triangle.h"
