@@ -9,6 +9,7 @@ namespace fy {
         fy::Vec2 position;
         float rotation;
 
+    protected:
         Body(fy::Vec2 position, float rotation);
     };
 }
