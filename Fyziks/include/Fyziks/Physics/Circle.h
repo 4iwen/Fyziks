@@ -8,6 +8,6 @@ namespace fy {
     public:
         float radius;
 
-        Circle(float radius, fy::Vec2 position, float rotation);
+        Circle(float radius) : radius(radius), Body() {}
     };
 }

@@ -1,10 +1,27 @@
 #include "App.h"
 
+using namespace fy;
+
 void App::run() {
     // create the window
     std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
     sf::Clock deltaClock;
     window->setVsync(true);
+
+    World world;
+    Rectangle rec1(50.0f, 50.0f);
+    rec1.position = Vec2(720, 360);
+    rec1.mass = 10.0f;
+    rec1.torque = 1000.0f;
+    rec1.inertia = 10.0f;
+    world.add(&rec1);
+
+    Rectangle rec2(50.0f, 50.0f);
+    rec2.position = Vec2(820, 360);
+    rec2.mass = 1000.0f;
+    rec2.torque = 100.0f;
+    rec2.inertia = 100.0f;
+    world.add(&rec2);
 
     while (window->isOpen()) {
         // handle events (window, mouse, keyboard)
@@ -15,40 +32,53 @@ void App::run() {
         // update imgui
         ImGui::SFML::Update(*window->window, deltaClock.restart());
 
+        // apply physics
+        /*
+        for (int i = 0; i < world.bodies.size(); ++i) {
+            world.bodies[i]->addForce(Vec2(0.0f, -10.0f));
+        }
+        */
+
+        world.step();
+
         // *-*-*-*-*-*-* draw to the buffer -*-*-*-*-*-*-*
         // draw imgui
-        window->drawUI();
+        window->drawUI(&world);
 
-        // tester for rotation
-        static float rot = 0.0f;
-        ImGui::Begin("tester");
-        ImGui::SliderAngle("rot", &rot, 0.0f, 360.0f);
-        ImGui::End();
-
-        //                 width,  height,position,                 rotation (radians)
-        fy::Rectangle rec1(120.0f, 80.0f, fy::Vec2(720.0f, 230.0f), rot);
-        window->drawRectangle(&rec1);
-
-        //                vertices,                 position,                 rotation
-        fy::Triangle tri1(fy::Vec2(-100.0f, -50.0f),
-                          fy::Vec2(0.0f, 100.0f),
-                          fy::Vec2(100.0f, -50.0f), fy::Vec2(800.0f, 400.0f), rot);
-        window->drawTriangle(&tri1);
-
-        //              radius,position                  rotation
-        fy::Circle cir1(50.0f, fy::Vec2(600.0f, 200.0f), rot);
-        window->drawCircle(&cir1);
-
-        //                vertices,                 position                  rotation
-        fy::Polygon pol1({fy::Vec2(-50.0f, -60.0f),
-                          fy::Vec2(-10.0f, 40.0f),
-                          fy::Vec2(20.0f, 35.0f),
-                          fy::Vec2(35.0f, 0.0f),
-                          fy::Vec2(25.0f, -15.0f)}, fy::Vec2(660.0f, 550.0f), rot);
-        window->drawPolygon(&pol1);
+        // draw world
+        for (int i = 0; i < world.bodies.size(); ++i) {
+            window->drawShape(world.bodies[i]);
+        }
         // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
         // render everything from the buffer
         window->render();
+    }
+}
+
+void App::demo1() {
+
+}
+
+void App::demo2() {
+
+}
+
+void App::demo3() {
+
+}
+
+void App::runDemo(int number) {
+    switch (number) {
+        default:
+        case 1:
+            demo1();
+            break;
+        case 2:
+            demo2();
+            break;
+        case 3:
+            demo3();
+            break;
     }
 }

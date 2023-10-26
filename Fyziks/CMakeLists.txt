@@ -1,10 +1,7 @@
 set(
         SOURCE_FILES
+        src/World.cpp
         src/Body.cpp
-        src/Rectangle.cpp
-        src/Circle.cpp
-        src/Triangle.cpp
-        src/Polygon.cpp
 )
 
 include_directories(include)

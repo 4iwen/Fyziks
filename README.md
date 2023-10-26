@@ -28,7 +28,7 @@ You can find the latest release on the [releases](https://github.com/4iwen/Fyzik
         - `sudo apt install gcc`
         - `brew install gcc`
 
-4. Run `build.sh` or `build.bat`
+4. Run `build.sh` or `build_mingw.bat` or `build_visual_studio.bat`
 5. Built files are located in the bin/ folder
 
 ### Usage

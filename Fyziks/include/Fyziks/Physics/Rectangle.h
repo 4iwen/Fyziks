@@ -8,6 +8,6 @@ namespace fy {
     public:
         float width, height;
 
-        Rectangle(float width, float height, fy::Vec2 position, float rotation);
+        Rectangle(float width, float height) : width(width), height(height), Body() {}
     };
 }
