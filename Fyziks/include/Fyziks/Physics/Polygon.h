@@ -10,6 +10,6 @@ namespace fy {
     public:
         std::vector<fy::Vec2> vertices;
 
-        Polygon(std::vector<fy::Vec2> vertices, fy::Vec2 position, float rotation);
+        Polygon(std::vector<fy::Vec2> vertices) : vertices(std::move(vertices)), Body() {}
     };
 }

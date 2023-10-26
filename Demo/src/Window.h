@@ -35,7 +35,18 @@ public:
 
     void render();
 
-    void drawUI();
+    void drawUI(fy::World *world);
+
+    void drawShape(const fy::Body *shape) const;
+
+private:
+    void drawMetrics();
+
+    void drawDemos();
+
+    void drawPhysicsConfig(fy::World *world);
+
+    void drawObjectConfig(fy::World *world);
 
     void drawRectangle(const fy::Rectangle *rectangle) const;
 

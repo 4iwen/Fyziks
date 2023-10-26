@@ -44,70 +44,18 @@ void Window::setVsync(bool enabled) {
     window->setVerticalSyncEnabled(enabled);
 }
 
-void Window::drawUI() {
+void Window::drawUI(fy::World *world) {
     // make the whole window dockable
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
-
     // metrics window
-    ImGui::Begin("Metrics"); // begins a new window with a name
-    ImGui::Text("FPS: %.2f",
-                ImGui::GetIO().Framerate); // displays the fps as a text
-    ImGui::Text("Frame time: %.2f ms",
-                1000.0f /
-                ImGui::GetIO().Framerate); // displays the frame times as text
-    static float values[90] = {0};
-    static int values_offset = 0;
-    values[values_offset] = 1000.0f / ImGui::GetIO().Framerate;
-    values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-    ImGui::PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
-                     nullptr, 0.0f, 100.0f,
-                     ImVec2(0, 80)); // displays the frame times as a chart
-    ImGui::End();                    // ends the window
-
-    // example window
-    ImGui::Begin("Examples");
-    if (ImGui::TreeNode("Basic")) {
-        if (ImGui::BeginTable("table1", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Basic example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
-        }
-
-        ImGui::TreePop();
-    }
-    if (ImGui::TreeNode("Advanced")) {
-        if (ImGui::BeginTable("table2", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Advanced example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
-        }
-
-        ImGui::TreePop();
-    }
-    if (ImGui::TreeNode("Explosions")) {
-        if (ImGui::BeginTable("table3", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Explosions example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
-        }
-
-        ImGui::TreePop();
-    }
-    ImGui::End();
-
-    ImGui::Begin("Physics config");
-    ImGui::Text("Physics config");
-    ImGui::End();
+    drawMetrics();
+    // demos window
+    drawDemos();
+    // physics config
+    drawPhysicsConfig(world);
+    // objects
+    drawObjectConfig(world);
 }
 
 void Window::drawRectangle(const fy::Rectangle *rectangle) const {
@@ -138,7 +86,8 @@ void Window::drawCircle(const fy::Circle *circle) const {
 
     for (int i = 0; i < segments + 1; i++) {
         float angle = static_cast<float>(i) * angleIncrement;
-        fy::Vec2 point = circle->position + rotation * fy::Vec2(circle->radius * cosf(angle), circle->radius * sinf(angle));
+        fy::Vec2 point =
+                circle->position + rotation * fy::Vec2(circle->radius * cosf(angle), circle->radius * sinf(angle));
         vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[6]);
     }
     vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), colors[6]);
@@ -177,4 +126,114 @@ void Window::drawPolygon(const fy::Polygon *polygon) const {
     vertices[verticesCount] = vertices[0];
 
     window->draw(vertices, verticesCount + 1, sf::LineStrip);
+}
+
+void Window::drawShape(const fy::Body *shape) const {
+    if (const auto *rectangle = dynamic_cast<const fy::Rectangle *>(shape)) {
+        drawRectangle(rectangle);
+    } else if (const auto *circle = dynamic_cast<const fy::Circle *>(shape)) {
+        drawCircle(circle);
+    } else if (const auto *triangle = dynamic_cast<const fy::Triangle *>(shape)) {
+        drawTriangle(triangle);
+    } else if (const auto *polygon = dynamic_cast<const fy::Polygon *>(shape)) {
+        drawPolygon(polygon);
+    }
+}
+
+void Window::drawMetrics() {
+    ImGui::Begin("Metrics"); // begins a new window with a name
+    ImGui::Text("FPS: %.2f",
+                ImGui::GetIO().Framerate); // displays the fps as a text
+    ImGui::Text("Frame time: %.2f ms",
+                1000.0f /
+                ImGui::GetIO().Framerate); // displays the frame times as text
+    static float values[90] = {0};
+    static int values_offset = 0;
+    values[values_offset] = 1000.0f / ImGui::GetIO().Framerate;
+    values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
+    ImGui::PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
+                     nullptr, 0.0f, 100.0f,
+                     ImVec2(0, 80)); // displays the frame times as a chart
+    ImGui::End();                    // ends the window
+}
+
+void Window::drawDemos() {
+    ImGui::Begin("Examples");
+    if (ImGui::TreeNode("Basic")) {
+        if (ImGui::BeginTable("table1", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Basic example");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::SmallButton("Load");
+            ImGui::EndTable();
+        }
+
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Advanced")) {
+        if (ImGui::BeginTable("table2", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Advanced example");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::SmallButton("Load");
+            ImGui::EndTable();
+        }
+
+        ImGui::TreePop();
+    }
+    if (ImGui::TreeNode("Explosions")) {
+        if (ImGui::BeginTable("table3", 2)) {
+            ImGui::TableNextRow();
+            ImGui::TableSetColumnIndex(0);
+            ImGui::Text("Explosions example");
+            ImGui::TableSetColumnIndex(1);
+            ImGui::SmallButton("Load");
+            ImGui::EndTable();
+        }
+
+        ImGui::TreePop();
+    }
+    ImGui::End();
+}
+
+void Window::drawPhysicsConfig(fy::World *world) {
+    ImGui::Begin("Physics config");
+
+    ImGui::SliderInt("Iterations", &world->iterations, 1, 32);
+
+    static int steps = 60;
+    ImGui::SliderInt("Time step", &steps, 1, 120);
+    world->timeStep = 1.0f / (float) steps;
+
+    ImGui::InputFloat2("Gravity", &world->gravity.x);
+
+    ImGui::End();
+}
+
+void Window::drawObjectConfig(fy::World *world) {
+    ImGui::Begin("Objects");
+
+    for (int i = 0; i < world->bodies.size(); ++i) {
+        fy::Body *body = world->bodies[i];
+
+        ImGui::PushID(i);
+        if (ImGui::TreeNode(std::to_string(i).c_str())) {
+            ImGui::InputFloat2("Position", &body->position.x);
+            ImGui::SliderAngle("Rotation", &body->rotation);
+            ImGui::InputFloat2("Velocity", &body->velocity.x);
+            ImGui::InputFloat("Angular velocity", &body->angularVelocity);
+
+            ImGui::Spacing();
+
+            ImGui::InputFloat("Mass", &body->mass);
+            ImGui::InputFloat("Inertia", &body->inertia);
+            ImGui::InputFloat("Friction", &body->friction);
+
+            ImGui::TreePop();
+        }
+        ImGui::PopID();
+    }
+    ImGui::End();
 }

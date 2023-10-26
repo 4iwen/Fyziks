@@ -27,13 +27,13 @@ namespace fy {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
-        return Vec2(xValue, yValue);
+        return {xValue, yValue};
     }
 
     inline Vec2 operator*(const Vec2 &vec, const Mat2x2 &mat) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
-        return Vec2(xValue, yValue);
+        return {xValue, yValue};
     }
 }

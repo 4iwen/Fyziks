@@ -13,7 +13,7 @@ namespace fy {
         Vec2(float x, float y) : x(x), y(y) {}
 
         Vec2 operator-() const {
-            return Vec2(-this->x, -this->y);
+            return {-this->x, -this->y};
         }
 
         void operator+=(const Vec2 &other) {
@@ -42,14 +42,18 @@ namespace fy {
     };
 
     inline Vec2 operator+(const Vec2 &vec1, const Vec2 &vec2) {
-        return Vec2(vec1.x + vec2.x, vec1.y + vec2.y);
+        return {vec1.x + vec2.x, vec1.y + vec2.y};
     }
 
     inline Vec2 operator-(const Vec2 &vec1, const Vec2 &vec2) {
-        return Vec2(vec1.x - vec2.x, vec1.y - vec2.y);
+        return {vec1.x - vec2.x, vec1.y - vec2.y};
     }
 
     inline Vec2 operator*(const Vec2 vec, float scalar) {
-        return Vec2(vec.x * scalar, vec.y * scalar);
+        return {vec.x * scalar, vec.y * scalar};
+    }
+
+    inline Vec2 operator*(float scalar, const Vec2 vec) {
+        return {vec.x * scalar, vec.y * scalar};
     }
 }
