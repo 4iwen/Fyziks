@@ -9,6 +9,8 @@ Window::Window(std::string title, sf::Vector2u size) {
     this->window = std::make_unique<sf::RenderWindow>(
             sf::VideoMode(size.x, size.y), title, sf::Style::Default,
             sf::ContextSettings(0, 0, 8));
+    this->view = std::make_unique<sf::View>(sf::FloatRect(0, 0, (float) size.x, (float) size.y));
+    window->setView(*view);
 
     if (!ImGui::SFML::Init(*window)) {
         printf("Initializing ImGui with SFML failed!\n");
@@ -35,8 +37,32 @@ void Window::handleEvents() {
     while (window->pollEvent(event)) {
         ImGui::SFML::ProcessEvent(*window, event);
 
-        if (event.type == sf::Event::Closed)
+        if (event.type == sf::Event::Closed) {
             window->close();
+        }
+        if (event.type == sf::Event::Resized) {
+            sf::Vector2f viewCenter = view->getCenter();
+            view->setSize((float) event.size.width, (float) event.size.height);
+            view->setCenter(viewCenter);
+            window->setView(*view);
+        }
+        if (event.type == sf::Event::MouseWheelScrolled) {
+            view->zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
+            window->setView(*view);
+        }
+        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+            lastMousePosition = sf::Mouse::getPosition();
+        }
+    }
+}
+
+void Window::updateCamera() {
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+        sf::Vector2i newMousePosition = sf::Mouse::getPosition();
+        sf::Vector2f offset = window->mapPixelToCoords(newMousePosition) - window->mapPixelToCoords(lastMousePosition);
+        view->move(-offset);
+        window->setView(*view);
+        lastMousePosition = newMousePosition;
     }
 }
 
@@ -68,11 +94,11 @@ void Window::drawRectangle(const fy::Rectangle *rectangle) const {
     fy::Vec2 v4 = rectangle->position + rotation * fy::Vec2(-half.x, half.y);
 
     sf::Vertex vertices[5] = {
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v4.x, v4.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6])
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v4.x, v4.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5])
     };
 
     window->draw(vertices, 5, sf::LineStrip);
@@ -88,9 +114,9 @@ void Window::drawCircle(const fy::Circle *circle) const {
         float angle = static_cast<float>(i) * angleIncrement;
         fy::Vec2 point =
                 circle->position + rotation * fy::Vec2(circle->radius * cosf(angle), circle->radius * sinf(angle));
-        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[6]);
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[5]);
     }
-    vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), colors[6]);
+    vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), colors[5]);
 
 
     window->draw(vertices, segments + 2, sf::LineStrip);
@@ -104,10 +130,10 @@ void Window::drawTriangle(const fy::Triangle *triangle) const {
     fy::Vec2 v3 = triangle->position + rotation * triangle->point3;
 
     sf::Vertex vertices[4] = {
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[6]),
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[6])
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[5]),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5])
     };
 
     window->draw(vertices, 4, sf::LineStrip);
@@ -121,7 +147,7 @@ void Window::drawPolygon(const fy::Polygon *polygon) const {
 
     for (int i = 0; i < verticesCount; i++) {
         fy::Vec2 point = polygon->position + rotation * polygon->vertices[i];
-        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[6]);
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[5]);
     }
     vertices[verticesCount] = vertices[0];
 
@@ -221,7 +247,7 @@ void Window::drawObjectConfig(fy::World *world) {
         ImGui::PushID(i);
         if (ImGui::TreeNode(std::to_string(i).c_str())) {
             ImGui::InputFloat2("Position", &body->position.x);
-            ImGui::SliderAngle("Rotation", &body->rotation);
+            ImGui::SliderAngle("Rotation", &body->rotation, ImGuiSliderFlags_AlwaysClamp);
             ImGui::InputFloat2("Velocity", &body->velocity.x);
             ImGui::InputFloat("Angular velocity", &body->angularVelocity);
 

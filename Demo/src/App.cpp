@@ -26,19 +26,14 @@ void App::run() {
     while (window->isOpen()) {
         // handle events (window, mouse, keyboard)
         window->handleEvents();
+        window->updateCamera();
         // clear the window
-        window->clear(window->colors[7]);
+        window->clear(window->colors[6]);
 
         // update imgui
         ImGui::SFML::Update(*window->window, deltaClock.restart());
 
         // apply physics
-        /*
-        for (int i = 0; i < world.bodies.size(); ++i) {
-            world.bodies[i]->addForce(Vec2(0.0f, -10.0f));
-        }
-        */
-
         world.step();
 
         // *-*-*-*-*-*-* draw to the buffer -*-*-*-*-*-*-*

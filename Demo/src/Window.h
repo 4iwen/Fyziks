@@ -9,16 +9,18 @@
 class Window {
 public:
     std::unique_ptr<sf::RenderWindow> window;
+    std::unique_ptr<sf::View> view;
+    sf::Vector2i lastMousePosition;
+
     const std::array<sf::Color, 9> colors = {
-            sf::Color(251, 73, 52),   // [0] red
-            sf::Color(184, 187, 38),  // [1] light green
-            sf::Color(250, 189, 47),  // [2] yellow
-            sf::Color(131, 165, 152), // [3] blue
-            sf::Color(211, 134, 155), // [4] purple
-            sf::Color(142, 192, 124), // [5] dark green
-            sf::Color(235, 219, 178), // [6] white
-            sf::Color(40, 40, 40),    // [7] black
-            sf::Color(146, 131, 116)  // [8] gray
+            sf::Color(255, 0, 0),     // [0] red
+            sf::Color(0, 255, 0),     // [1] green
+            sf::Color(0, 0, 255),     // [2] blue
+            sf::Color(255, 255, 0),   // [3] yellow
+            sf::Color(255, 0, 255),   // [4] purple
+            sf::Color(255, 255, 255), // [5] white
+            sf::Color(64, 64, 64),    // [6] gray
+            sf::Color(0, 0, 0),       // [7] black
     };
 
     Window(std::string title, sf::Vector2u size);
@@ -28,6 +30,8 @@ public:
     bool isOpen();
 
     void handleEvents();
+
+    void updateCamera();
 
     void clear(sf::Color color);
 
