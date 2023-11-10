@@ -1,9 +1,12 @@
 #include "Window.h"
-#include "SFML/Graphics/VertexArray.hpp"
-#include "SFML/System/Vector2.hpp"
 
 #include <cstdio>
 #include <cmath>
+
+using namespace fy;
+
+sf::Color defaultColor = COLOR_WHITE;
+sf::Color collisionColor = COLOR_RED;
 
 Window::Window(std::string title, sf::Vector2u size) {
     this->window = std::make_unique<sf::RenderWindow>(
@@ -50,13 +53,14 @@ void Window::handleEvents() {
             view->zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
             window->setView(*view);
         }
-        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right) {
+        if (event.type == sf::Event::MouseButtonPressed) {
             lastMousePosition = sf::Mouse::getPosition();
         }
     }
 }
 
 void Window::updateCamera() {
+    // when right mouse button is pressed calculate the new camera position and update it
     if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
         sf::Vector2i newMousePosition = sf::Mouse::getPosition();
         sf::Vector2f offset = window->mapPixelToCoords(newMousePosition) - window->mapPixelToCoords(lastMousePosition);
@@ -70,7 +74,7 @@ void Window::setVsync(bool enabled) {
     window->setVerticalSyncEnabled(enabled);
 }
 
-void Window::drawUI(fy::World *world) {
+void Window::drawUI(World *world) {
     // make the whole window dockable
     ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
                                  ImGuiDockNodeFlags_PassthruCentralNode);
@@ -82,86 +86,125 @@ void Window::drawUI(fy::World *world) {
     drawPhysicsConfig(world);
     // objects
     drawObjectConfig(world);
+    // demo window
+    // ImGui::ShowDemoWindow();
 }
 
-void Window::drawRectangle(const fy::Rectangle *rectangle) const {
-    fy::Mat2x2 rotation(rectangle->rotation);
-    fy::Vec2 half(rectangle->width * 0.5f, rectangle->height * 0.5f);
+void Window::drawRectangle(const Rectangle *rectangle) const {
+    std::vector<Vec2f> translatedVertices = rectangle->getTranslatedVertices();
 
-    fy::Vec2 v1 = rectangle->position + rotation * fy::Vec2(-half.x, -half.y);
-    fy::Vec2 v2 = rectangle->position + rotation * fy::Vec2(half.x, -half.y);
-    fy::Vec2 v3 = rectangle->position + rotation * fy::Vec2(half.x, half.y);
-    fy::Vec2 v4 = rectangle->position + rotation * fy::Vec2(-half.x, half.y);
+    // calculate the 4 corners of the rectangle
+    Vec2f v1 = translatedVertices[0];
+    Vec2f v2 = translatedVertices[1];
+    Vec2f v3 = translatedVertices[2];
+    Vec2f v4 = translatedVertices[3];
 
+    sf::Color color;
+    if (rectangle->colliding) {
+        color = collisionColor;
+    } else {
+        color = defaultColor;
+    }
+
+    // add the to vertex array
     sf::Vertex vertices[5] = {
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v4.x, v4.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5])
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
+            sf::Vertex(sf::Vector2f(v4.x, v4.y), color),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
     };
 
+    // draw rectangle
     window->draw(vertices, 5, sf::LineStrip);
 }
 
-void Window::drawCircle(const fy::Circle *circle) const {
-    int segments = 18;
+void Window::drawCircle(const Circle *circle) const {
+    // segments of the circle
+    const int segments = 18;
     sf::Vertex vertices[segments + 2];
-    fy::Mat2x2 rotation(circle->rotation);
-    const float angleIncrement = 2 * M_PIf / static_cast<float>(segments);
+    Mat2x2 rotation(circle->rotation);
+    const float angleIncrement = 2 * PIf / static_cast<float>(segments);
 
+    sf::Color color;
+    if (circle->colliding) {
+        color = collisionColor;
+    } else {
+        color = defaultColor;
+    }
+
+    // fill the vertex array
     for (int i = 0; i < segments + 1; i++) {
         float angle = static_cast<float>(i) * angleIncrement;
-        fy::Vec2 point =
-                circle->position + rotation * fy::Vec2(circle->radius * cosf(angle), circle->radius * sinf(angle));
-        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[5]);
+        Vec2f point =
+                circle->position + rotation * Vec2f(circle->radius * cosf(angle), circle->radius * sinf(angle));
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), color);
     }
-    vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), colors[5]);
+    vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), color);
 
-
+    // draw the circle
     window->draw(vertices, segments + 2, sf::LineStrip);
 }
 
-void Window::drawTriangle(const fy::Triangle *triangle) const {
-    fy::Mat2x2 rotation(triangle->rotation);
+void Window::drawTriangle(const Triangle *triangle) const {
+    std::vector<Vec2f> translatedVertices = triangle->getTranslatedVertices();
 
-    fy::Vec2 v1 = triangle->position + rotation * triangle->point1;
-    fy::Vec2 v2 = triangle->position + rotation * triangle->point2;
-    fy::Vec2 v3 = triangle->position + rotation * triangle->point3;
 
+    // get the 3 points of a triangle
+    Vec2f v1 = translatedVertices[0];
+    Vec2f v2 = translatedVertices[1];
+    Vec2f v3 = translatedVertices[2];
+
+    sf::Color color;
+    if (triangle->colliding) {
+        color = collisionColor;
+    } else {
+        color = defaultColor;
+    }
+
+    // create a vertex array
     sf::Vertex vertices[4] = {
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v2.x, v2.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v3.x, v3.y), colors[5]),
-            sf::Vertex(sf::Vector2f(v1.x, v1.y), colors[5])
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
     };
 
+    // draw the triangle
     window->draw(vertices, 4, sf::LineStrip);
 }
 
-void Window::drawPolygon(const fy::Polygon *polygon) const {
-    unsigned long verticesCount = polygon->vertices.size();
+void Window::drawPolygon(const Polygon *polygon) const {
+    std::vector<Vec2f> translatedVertices = polygon->getTranslatedVertices();
+
+    unsigned long verticesCount = translatedVertices.size();
 
     sf::Vertex vertices[verticesCount + 1];
-    fy::Mat2x2 rotation(polygon->rotation);
+
+    sf::Color color;
+    if (polygon->colliding) {
+        color = collisionColor;
+    } else {
+        color = defaultColor;
+    }
 
     for (int i = 0; i < verticesCount; i++) {
-        fy::Vec2 point = polygon->position + rotation * polygon->vertices[i];
-        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), colors[5]);
+        Vec2f point = translatedVertices[i];
+        vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), color);
     }
     vertices[verticesCount] = vertices[0];
 
     window->draw(vertices, verticesCount + 1, sf::LineStrip);
 }
 
-void Window::drawShape(const fy::Body *shape) const {
-    if (const auto *rectangle = dynamic_cast<const fy::Rectangle *>(shape)) {
+void Window::drawShape(const Body *shape) const {
+    if (const auto *rectangle = dynamic_cast<const Rectangle *>(shape)) {
         drawRectangle(rectangle);
-    } else if (const auto *circle = dynamic_cast<const fy::Circle *>(shape)) {
+    } else if (const auto *circle = dynamic_cast<const Circle *>(shape)) {
         drawCircle(circle);
-    } else if (const auto *triangle = dynamic_cast<const fy::Triangle *>(shape)) {
+    } else if (const auto *triangle = dynamic_cast<const Triangle *>(shape)) {
         drawTriangle(triangle);
-    } else if (const auto *polygon = dynamic_cast<const fy::Polygon *>(shape)) {
+    } else if (const auto *polygon = dynamic_cast<const Polygon *>(shape)) {
         drawPolygon(polygon);
     }
 }
@@ -224,7 +267,7 @@ void Window::drawDemos() {
     ImGui::End();
 }
 
-void Window::drawPhysicsConfig(fy::World *world) {
+void Window::drawPhysicsConfig(World *world) {
     ImGui::Begin("Physics config");
 
     ImGui::SliderInt("Iterations", &world->iterations, 1, 32);
@@ -233,29 +276,31 @@ void Window::drawPhysicsConfig(fy::World *world) {
     ImGui::SliderInt("Time step", &steps, 1, 120);
     world->timeStep = 1.0f / (float) steps;
 
-    ImGui::InputFloat2("Gravity", &world->gravity.x);
+    ImGui::DragFloat2("Gravity", &world->gravity.x);
 
     ImGui::End();
 }
 
-void Window::drawObjectConfig(fy::World *world) {
+void Window::drawObjectConfig(World *world) {
     ImGui::Begin("Objects");
 
     for (int i = 0; i < world->bodies.size(); ++i) {
-        fy::Body *body = world->bodies[i];
+        Body *body = world->bodies[i];
+
+        std::string name = "obj [" + std::to_string(i) + "]";
 
         ImGui::PushID(i);
-        if (ImGui::TreeNode(std::to_string(i).c_str())) {
-            ImGui::InputFloat2("Position", &body->position.x);
-            ImGui::SliderAngle("Rotation", &body->rotation, ImGuiSliderFlags_AlwaysClamp);
-            ImGui::InputFloat2("Velocity", &body->velocity.x);
-            ImGui::InputFloat("Angular velocity", &body->angularVelocity);
+        if (ImGui::TreeNode(name.c_str())) {
+            ImGui::DragFloat2("Position", &body->position.x);
+            ImGui::SliderAngle("Rotation", &body->rotation, 0.0f, 360.0f);
+            ImGui::DragFloat2("Velocity", &body->velocity.x);
+            ImGui::DragFloat("Angular velocity", &body->angularVelocity);
 
             ImGui::Spacing();
 
-            ImGui::InputFloat("Mass", &body->mass);
-            ImGui::InputFloat("Inertia", &body->inertia);
-            ImGui::InputFloat("Friction", &body->friction);
+            ImGui::DragFloat("Mass", &body->mass);
+            ImGui::DragFloat("Inertia", &body->inertia);
+            ImGui::DragFloat("Friction", &body->friction);
 
             ImGui::TreePop();
         }

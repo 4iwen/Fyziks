@@ -1,17 +1,15 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include "Fyziks/Math/Vec2.h"
-
-#include <limits>
+#include "Fyziks/Math/Vec2f.h"
 
 namespace fy {
     class FYZIKS_API Body {
     public:
         // state
-        fy::Vec2 position;
+        fy::Vec2f position;
         float rotation;
-        fy::Vec2 velocity;
+        fy::Vec2f velocity;
         float angularVelocity;
 
         // properties
@@ -20,27 +18,41 @@ namespace fy {
         float friction;
 
         // applied forces
-        fy::Vec2 force;
+        fy::Vec2f force;
         float torque;
 
-        void addForce(fy::Vec2 f) {
+        bool colliding = true;
+
+        void addForce(fy::Vec2f f) {
             this->force += f;
         }
 
-        float inverseMass() const {
-            if (mass != 0.0f) {
+        void addTorque(float t) {
+            this->torque += t;
+        }
+
+        float getInverseMass() const {
+            if (mass != 0) {
                 return 1.0f / mass;
             } else {
                 return 0.0f;
             }
         }
 
-        float inverseInertia() const {
-            if (inertia != 0.0f) {
+        float getInverseInertia() const {
+            if (inertia != 0) {
                 return 1.0f / inertia;
             } else {
                 return 0.0f;
             }
+        }
+
+        template<typename T>
+        T *castAndCheck() {
+            if (dynamic_cast<T *>(this)) {
+                return dynamic_cast<T *>(this);
+            }
+            return nullptr;
         }
 
         virtual ~Body() {}

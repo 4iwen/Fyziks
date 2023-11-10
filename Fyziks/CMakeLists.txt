@@ -2,6 +2,7 @@ set(
         SOURCE_FILES
         src/World.cpp
         src/Body.cpp
+        src/Collision.cpp
 )
 
 include_directories(include)

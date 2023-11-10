@@ -1,14 +1,11 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include "Body.h"
+#include "Polygon.h"
 
 namespace fy {
-    class FYZIKS_API Triangle : public Body {
+    class FYZIKS_API Triangle : public Polygon {
     public:
-        fy::Vec2 point1, point2, point3;
-
-        Triangle(fy::Vec2 point1, fy::Vec2 point2, fy::Vec2 point3) : point1(point1), point2(point2), point3(point3),
-                                                                      Body() {}
+        Triangle(Vec2f point1, Vec2f point2, Vec2f point3) : Polygon({point1, point2, point3}) {}
     };
 }
