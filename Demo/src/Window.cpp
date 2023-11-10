@@ -179,7 +179,7 @@ void Window::drawPolygon(const Polygon *polygon) const {
 
     unsigned long verticesCount = translatedVertices.size();
 
-    sf::Vertex vertices[verticesCount + 1];
+    sf::Vertex* vertices = new sf::Vertex[verticesCount + 1];
 
     sf::Color color;
     if (polygon->colliding) {
@@ -195,6 +195,8 @@ void Window::drawPolygon(const Polygon *polygon) const {
     vertices[verticesCount] = vertices[0];
 
     window->draw(vertices, verticesCount + 1, sf::LineStrip);
+
+    delete[] vertices;
 }
 
 void Window::drawShape(const Body *shape) const {
