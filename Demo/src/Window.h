@@ -6,22 +6,20 @@
 #include <imgui.h>
 #include <memory>
 
+#define COLOR_RED sf::Color(255, 0, 0)
+#define COLOR_GREEN sf::Color(0, 255, 0)
+#define COLOR_BLUE sf::Color(0, 0, 255)
+#define COLOR_YELLOW sf::Color(255, 255, 0)
+#define COLOR_PURPLE sf::Color(255, 0, 255)
+#define COLOR_WHITE sf::Color(255, 255, 255)
+#define COLOR_GRAY sf::Color(64, 64, 64)
+#define COLOR_BLACK sf::Color(0, 0, 0)
+
 class Window {
 public:
     std::unique_ptr<sf::RenderWindow> window;
     std::unique_ptr<sf::View> view;
     sf::Vector2i lastMousePosition;
-
-    const std::array<sf::Color, 9> colors = {
-            sf::Color(255, 0, 0),     // [0] red
-            sf::Color(0, 255, 0),     // [1] green
-            sf::Color(0, 0, 255),     // [2] blue
-            sf::Color(255, 255, 0),   // [3] yellow
-            sf::Color(255, 0, 255),   // [4] purple
-            sf::Color(255, 255, 255), // [5] white
-            sf::Color(64, 64, 64),    // [6] gray
-            sf::Color(0, 0, 0),       // [7] black
-    };
 
     Window(std::string title, sf::Vector2u size);
 

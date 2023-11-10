@@ -17,20 +17,20 @@ namespace fy {
             float cosValue = cosf(angle);
 
             r1c1 = cosValue;
-            r1c2 = sinValue;
+            r1c2 = -sinValue;
             r2c1 = sinValue;
-            r2c2 = -cosValue;
+            r2c2 = cosValue;
         }
     };
 
-    inline Vec2 operator*(const fy::Mat2x2 &mat, const Vec2 &vec) {
+    inline Vec2f operator*(const fy::Mat2x2 &mat, const Vec2f &vec) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
         return {xValue, yValue};
     }
 
-    inline Vec2 operator*(const Vec2 &vec, const Mat2x2 &mat) {
+    inline Vec2f operator*(const Vec2f &vec, const Mat2x2 &mat) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 

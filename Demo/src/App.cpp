@@ -4,31 +4,50 @@ using namespace fy;
 
 void App::run() {
     // create the window
-    std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 720));
+    std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 810));
     sf::Clock deltaClock;
     window->setVsync(true);
 
     World world;
+
+    Circle cir1(25.0f);
+    cir1.position = Vec2f(700, 300);
+    world.add(&cir1);
+
+    Circle cir2(35.0f);
+    cir2.position = Vec2f(700, 330);
+    world.add(&cir2);
+
     Rectangle rec1(50.0f, 50.0f);
-    rec1.position = Vec2(720, 360);
-    rec1.mass = 10.0f;
-    rec1.torque = 1000.0f;
-    rec1.inertia = 10.0f;
+    rec1.position = Vec2f(720, 460);
     world.add(&rec1);
 
-    Rectangle rec2(50.0f, 50.0f);
-    rec2.position = Vec2(820, 360);
-    rec2.mass = 1000.0f;
-    rec2.torque = 100.0f;
-    rec2.inertia = 100.0f;
-    world.add(&rec2);
+    Triangle tri1(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
+    tri1.position = Vec2f(820, 360);
+    world.add(&tri1);
+
+    Polygon pol1({Vec2f(-15.0f, -15.0f), Vec2f(-30.0f, 30.0f), Vec2f(15.0f, 15.0f), Vec2f(30.0f, -30.0f)});
+    pol1.position = Vec2f(820, 360);
+    world.add(&pol1);
+
+    Polygon pol2({Vec2f(-30, -30), Vec2f(-20, 0), Vec2f(-30, 30), Vec2f(30, 30), Vec2f(20, 0), Vec2f(30, -30)});
+    pol2.position = Vec2f(820, 460);
+    world.add(&pol2);
+
+    Triangle tri2(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
+    tri2.position = Vec2f(720, 560);
+    world.add(&tri2);
+
+    Triangle tri3(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
+    tri3.position = Vec2f(820, 560);
+    world.add(&tri3);
 
     while (window->isOpen()) {
         // handle events (window, mouse, keyboard)
         window->handleEvents();
         window->updateCamera();
         // clear the window
-        window->clear(window->colors[6]);
+        window->clear(COLOR_GRAY);
 
         // update imgui
         ImGui::SFML::Update(*window->window, deltaClock.restart());

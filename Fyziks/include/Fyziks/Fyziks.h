@@ -5,8 +5,9 @@
 #include "Fyziks/Api.h"
 
 // math
-#include "Fyziks/Math/Vec2.h"
+#include "Fyziks/Math/Vec2f.h"
 #include "Fyziks/Math/Mat2x2.h"
+#include "Fyziks/Math/Misc.h"
 
 // world and objects
 #include "Fyziks/Physics/Body.h"
