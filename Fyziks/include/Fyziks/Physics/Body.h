@@ -24,12 +24,20 @@ namespace fy {
 
         bool colliding = true;
 
-        void addForce(Vec2f f) {
+        void addForce(const Vec2f f) {
             this->force += f;
         }
 
-        void addTorque(float t) {
+        void addTorque(const float t) {
             this->torque += t;
+        }
+
+        void move(const Vec2f vec) {
+            this->position += vec;
+        }
+
+        void moveTo(const Vec2f to) {
+            this->position = to;
         }
 
         float getInverseMass() const {
@@ -49,7 +57,7 @@ namespace fy {
         }
 
         template<typename T>
-        T* castAndCheck() {
+        T *castAndCheck() {
             if (auto ptr = dynamic_cast<T *>(this)) {
                 return ptr;
             }

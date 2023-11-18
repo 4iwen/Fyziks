@@ -28,7 +28,7 @@ namespace fy {
         void remove(Body *body) {
             for (auto it = bodies.begin(); it != bodies.end(); ++it) {
                 if (*it == body) {
-                    delete body;
+                    delete *it;
                     bodies.erase(it);
                     return;
                 }
@@ -43,7 +43,7 @@ namespace fy {
         }
 
     private:
-        void broadPhase();
+        void solveCollisions();
 
         void applyForces(float deltaTime);
 

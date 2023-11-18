@@ -24,14 +24,14 @@ namespace fy {
         }
     };
 
-    inline Vec2f operator*(const Mat2x2&mat, const Vec2f&vec) {
+    inline Vec2f operator*(const Mat2x2 &mat, const Vec2f &vec) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
         return {xValue, yValue};
     }
 
-    inline Vec2f operator*(const Vec2f&vec, const Mat2x2&mat) {
+    inline Vec2f operator*(const Vec2f &vec, const Mat2x2 &mat) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 

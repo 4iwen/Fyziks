@@ -4,8 +4,8 @@
 namespace fy {
     void World::step(float deltaTime) {
         for (int i = 0; i < iterations; ++i) {
-            // check for collisions
-            broadPhase();
+            // solve collisions
+            solveCollisions();
 
             // apply forces
             applyForces(deltaTime);
@@ -15,21 +15,24 @@ namespace fy {
         }
     }
 
-    void World::broadPhase() {
+    void World::solveCollisions() {
         for (int i = 0; i < bodies.size(); ++i) {
             bodies[i]->colliding = false;
         }
 
         for (int i = 0; i < bodies.size(); ++i) {
             for (int j = i + 1; j < bodies.size(); ++j) {
-                if (bodies[i] == bodies[j])
-                    continue;
+                Vec2f normal;
+                float depth;
 
-                bool intersecting = Collision::intersects(bodies[i], bodies[j]);
+                bool intersecting = Collision::intersects(bodies[i], bodies[j], normal, depth);
 
                 if (intersecting) {
                     bodies[i]->colliding = true;
                     bodies[j]->colliding = true;
+
+                    bodies[i]->move(-normal * (depth / 2.0f));
+                    bodies[j]->move(normal * (depth / 2.0f));
                 }
             }
         }

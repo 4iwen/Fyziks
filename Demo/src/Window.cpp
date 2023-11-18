@@ -10,10 +10,10 @@ using namespace ImGui;
 sf::Color defaultColor = COLOR_WHITE;
 sf::Color collisionColor = COLOR_RED;
 
-Window::Window(const std::string&title, const sf::Vector2u size) {
+Window::Window(const std::string &title, const sf::Vector2u size) {
     this->window = new sf::RenderWindow(
-        sf::VideoMode(size.x, size.y), title, sf::Style::Default,
-        sf::ContextSettings(0, 0, 8));
+            sf::VideoMode(size.x, size.y), title, sf::Style::Default,
+            sf::ContextSettings(0, 0, 8));
 
     this->view = sf::View(sf::FloatRect(0, 0, 0, 0));
     window->setView(view);
@@ -53,7 +53,7 @@ void Window::handleEvents() {
         }
         if (event.type == sf::Event::Resized) {
             sf::Vector2f viewCenter = view.getCenter();
-            view.setSize((float)event.size.width, (float)event.size.height);
+            view.setSize((float) event.size.width, (float) event.size.height);
             view.setCenter(viewCenter);
             window->setView(view);
         }
@@ -70,7 +70,8 @@ void Window::updateCamera() {
     // check if the left mouse button is pressed
     if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
         // calculate the offset between the current and last mouse positions
-        sf::Vector2f offset = window->mapPixelToCoords(currentMousePosition) - window->mapPixelToCoords(lastMousePosition);
+        sf::Vector2f offset =
+                window->mapPixelToCoords(currentMousePosition) - window->mapPixelToCoords(lastMousePosition);
         // move the view / camera
         view.move(-offset);
         window->setView(view);
@@ -83,7 +84,7 @@ void Window::setVsync(bool enabled) const {
     window->setVerticalSyncEnabled(enabled);
 }
 
-void Window::drawUI(World* world, bool&paused, float&timeStep) {
+void Window::drawUI(World *world, bool &paused, float &timeStep) {
     // make the whole window dock-able
     DockSpaceOverViewport(GetMainViewport(),
                           ImGuiDockNodeFlags_PassthruCentralNode);
@@ -99,7 +100,7 @@ void Window::drawUI(World* world, bool&paused, float&timeStep) {
     // ShowDemoWindow();
 }
 
-void Window::drawRectangle(Rectangle* rectangle) const {
+void Window::drawRectangle(Rectangle *rectangle) const {
     std::vector<Vec2f> translatedVertices = rectangle->getTranslatedVertices();
 
     // calculate the 4 corners of the rectangle
@@ -111,25 +112,24 @@ void Window::drawRectangle(Rectangle* rectangle) const {
     sf::Color color;
     if (rectangle->colliding) {
         color = collisionColor;
-    }
-    else {
+    } else {
         color = defaultColor;
     }
 
     // add to the vertex array
     sf::Vertex vertices[5] = {
-        sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
-        sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
-        sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
-        sf::Vertex(sf::Vector2f(v4.x, v4.y), color),
-        sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
+            sf::Vertex(sf::Vector2f(v4.x, v4.y), color),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
     };
 
     // draw rectangle
     window->draw(vertices, 5, sf::LineStrip);
 }
 
-void Window::drawCircle(Circle* circle) const {
+void Window::drawCircle(Circle *circle) const {
     // segments of the circle
     const int segments = 18;
     sf::Vertex vertices[segments + 2];
@@ -139,8 +139,7 @@ void Window::drawCircle(Circle* circle) const {
     sf::Color color;
     if (circle->colliding) {
         color = collisionColor;
-    }
-    else {
+    } else {
         color = defaultColor;
     }
 
@@ -157,7 +156,7 @@ void Window::drawCircle(Circle* circle) const {
     window->draw(vertices, segments + 2, sf::LineStrip);
 }
 
-void Window::drawTriangle(Triangle* triangle) const {
+void Window::drawTriangle(Triangle *triangle) const {
     std::vector<Vec2f> translatedVertices = triangle->getTranslatedVertices();
 
 
@@ -169,36 +168,34 @@ void Window::drawTriangle(Triangle* triangle) const {
     sf::Color color;
     if (triangle->colliding) {
         color = collisionColor;
-    }
-    else {
+    } else {
         color = defaultColor;
     }
 
     // create a vertex array
     sf::Vertex vertices[4] = {
-        sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
-        sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
-        sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
-        sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
+            sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
+            sf::Vertex(sf::Vector2f(v3.x, v3.y), color),
+            sf::Vertex(sf::Vector2f(v1.x, v1.y), color)
     };
 
     // draw the triangle
     window->draw(vertices, 4, sf::LineStrip);
 }
 
-void Window::drawPolygon(Polygon* polygon) const {
+void Window::drawPolygon(Polygon *polygon) const {
     // get translated vertices of polygon
     std::vector<Vec2f> translatedVertices = polygon->getTranslatedVertices();
     // get vertices count
     unsigned long verticesCount = translatedVertices.size();
     // create an array vertices + 1
-    auto* vertices = new sf::Vertex[verticesCount + 1];
+    auto *vertices = new sf::Vertex[verticesCount + 1];
 
     sf::Color color;
     if (polygon->colliding) {
         color = collisionColor;
-    }
-    else {
+    } else {
         color = defaultColor;
     }
 
@@ -216,7 +213,7 @@ void Window::drawPolygon(Polygon* polygon) const {
     delete[] vertices;
 }
 
-void Window::drawBody(Body* body, int id) const {
+void Window::drawBody(Body *body, int id) const {
     // decide what shape we're dealing with
     auto rectangle = body->castAndCheck<Rectangle>();
     auto circle = body->castAndCheck<Circle>();
@@ -226,14 +223,11 @@ void Window::drawBody(Body* body, int id) const {
     // draw it
     if (rectangle) {
         drawRectangle(rectangle);
-    }
-    else if (circle) {
+    } else if (circle) {
         drawCircle(circle);
-    }
-    else if (triangle) {
+    } else if (triangle) {
         drawTriangle(triangle);
-    }
-    else if (polygon) {
+    } else if (polygon) {
         drawPolygon(polygon);
     }
 
@@ -299,7 +293,7 @@ void Window::drawDemos() {
     End();
 }
 
-void Window::drawPhysicsConfig(World* world, bool&paused, float&timeStep) {
+void Window::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
     Begin("Physics config");
 
     Checkbox("Simulation paused", &paused);
@@ -308,62 +302,98 @@ void Window::drawPhysicsConfig(World* world, bool&paused, float&timeStep) {
 
     static int steps = 60;
     SliderInt("Time step", &steps, 1, 120);
-    timeStep = 1.0f / (float)steps;
+    timeStep = 1.0f / (float) steps;
 
     DragFloat2("Gravity", &world->gravity.x);
 
     End();
 }
 
-void Window::drawObjectConfig(World* world) {
+void Window::drawObjectConfig(World *world) {
     Begin("Objects");
 
-    static const char* bodyTypes[] = {
-        "Triangle",
-        "Rectangle",
-        "Polygon",
-        "Circle",
+    Text("Initial properties");
+
+    static Vec2f initialPosition = Vec2f();
+    static float initialRotation = 0.0f;
+    static Vec2f initialVelocity = Vec2f();
+    static float initialAngularVelocity = 0.0f;
+
+    DragFloat2("Position", &initialPosition.x);
+    SliderAngle("Rotation", &initialRotation, 0.0f, 360.0f);
+    DragFloat2("Velocity", &initialVelocity.x, 0.01f);
+    DragFloat("Angular velocity", &initialAngularVelocity, 0.01f);
+
+    Spacing();
+
+    static float initialMass = 0.0f;
+    static float initialInertia = 0.0f;
+    static float initialFriction = 0.2f;
+    DragFloat("Mass", &initialMass, 0.01f);
+    DragFloat("Inertia", &initialInertia, 0.01f);
+    DragFloat("Friction", &initialFriction, 0.01f);
+
+
+    Spacing();
+
+    static const char *bodyTypes[] = {
+            "Triangle",
+            "Rectangle",
+            "Polygon",
+            "Circle",
     };
     static int currentBodyTypeSelected = 0;
 
-    Combo("Add body", &currentBodyTypeSelected, bodyTypes, IM_ARRAYSIZE(bodyTypes));
+    Combo("Body type", &currentBodyTypeSelected, bodyTypes, IM_ARRAYSIZE(bodyTypes));
 
+    if (Button("Add body")) {
+        Body *body;
 
-    if (Button("Add")) {
         switch (currentBodyTypeSelected) {
             default:
             case 0:
-                world->create<Triangle>(
-                    Vec2f(-21.65, 12.5),
-                    Vec2f(21.65, 12.5),
-                    Vec2f(0, -25)
+                body = world->create<Triangle>(
+                        Vec2f(-21.65, 12.5),
+                        Vec2f(21.65, 12.5),
+                        Vec2f(0, -25)
                 );
                 break;
             case 1:
-                world->create<Rectangle>(50, 50);
+                body = world->create<Rectangle>(50, 50);
                 break;
             case 2:
-                world->create<Polygon>(std::vector{
-                    Vec2f(0, -25),
-                    Vec2f(-21.65, -12.5),
-                    Vec2f(-21.65, 12.5),
-                    Vec2f(0, 25),
-                    Vec2f(21.65, 12.5),
-                    Vec2f(21.65, -12.5),
+                body = world->create<Polygon>(std::vector{
+                        Vec2f(0, -25),
+                        Vec2f(-21.65, -12.5),
+                        Vec2f(-21.65, 12.5),
+                        Vec2f(0, 25),
+                        Vec2f(21.65, 12.5),
+                        Vec2f(21.65, -12.5),
                 });
                 break;
             case 3:
-                world->create<Circle>(25);
+                body = world->create<Circle>(25);
                 break;
         }
+
+        body->position = initialPosition;
+        body->rotation = initialRotation;
+        body->velocity = initialVelocity;
+        body->angularVelocity = initialAngularVelocity;
+
+        body->mass = initialMass;
+        body->inertia = initialInertia;
+        body->friction = initialFriction;
     }
-    SameLine();
-    if (Button("Clear")) {
+
+    if (Button("Remove all bodies")) {
         world->clear();
     }
 
     Spacing();
 
+    Text("%zu bodies", world->bodies.size());
+    BeginChild("Bodies", ImVec2(0, 0), true);
     for (int i = 0; i < world->bodies.size(); ++i) {
         auto body = world->bodies[i];
 
@@ -373,14 +403,14 @@ void Window::drawObjectConfig(World* world) {
         if (TreeNode(name.c_str())) {
             DragFloat2("Position", &body->position.x);
             SliderAngle("Rotation", &body->rotation, 0.0f, 360.0f);
-            DragFloat2("Velocity", &body->velocity.x);
-            DragFloat("Angular velocity", &body->angularVelocity);
+            DragFloat2("Velocity", &body->velocity.x, 0.01f);
+            DragFloat("Angular velocity", &body->angularVelocity, 0.01f);
 
             Spacing();
 
-            DragFloat("Mass", &body->mass);
-            DragFloat("Inertia", &body->inertia);
-            DragFloat("Friction", &body->friction);
+            DragFloat("Mass", &body->mass, 0.01f);
+            DragFloat("Inertia", &body->inertia, 0.01f);
+            DragFloat("Friction", &body->friction, 0.01f);
 
             if (Button("Delete")) {
                 world->remove(world->bodies[i]);
@@ -390,6 +420,8 @@ void Window::drawObjectConfig(World* world) {
         }
         PopID();
     }
+    EndChild();
+
     End();
 }
 
@@ -407,7 +439,7 @@ void Window::drawID(Vec2f pos, int id) const {
           ImGuiViewportFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
     std::string text_str = std::to_string(id);
-    const char* text_c_str = text_str.c_str();
+    const char *text_c_str = text_str.c_str();
 
     ImVec2 textSize = CalcTextSize(text_c_str);
     SetCursorPos(ImVec2(p.x - textSize.x / 2, p.y - textSize.y / 2));

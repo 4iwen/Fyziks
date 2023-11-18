@@ -33,55 +33,62 @@ void App::run() {
     rec1->position = Vec2f(100, 0);
 
     auto tri1 = world.create<Triangle>(
-        Vec2f(0.0f, -35.0f),
-        Vec2f(35.0f, 35.0f),
-        Vec2f(-35.0f, 35.0f)
+            Vec2f(0.0f, -35.0f),
+            Vec2f(35.0f, 35.0f),
+            Vec2f(-35.0f, 35.0f)
     );
     tri1->position = Vec2f(0, 100);
 
     auto pol1 = world.create<Polygon>(
-        std::vector<Vec2f>{
-            Vec2f(-15.0f, -15.0f),
-            Vec2f(-30.0f, 30.0f),
-            Vec2f(15.0f, 15.0f),
-            Vec2f(30.0f, -30.0f)
-        }
+            std::vector<Vec2f>{
+                    Vec2f(-15.0f, -15.0f),
+                    Vec2f(-30.0f, 30.0f),
+                    Vec2f(15.0f, 15.0f),
+                    Vec2f(30.0f, -30.0f)
+            }
     );
     pol1->position = Vec2f(-100, -100);
 
     auto pol2 = world.create<Polygon>(
-        std::vector<Vec2f>{
-            Vec2f(-30, -30),
-            Vec2f(-20, 0),
-            Vec2f(-30, 30),
-            Vec2f(30, 30),
-            Vec2f(20, 0),
-            Vec2f(30, -30)
-        }
+            std::vector<Vec2f>{
+                    Vec2f(-30, -30),
+                    Vec2f(-20, 0),
+                    Vec2f(-30, 30),
+                    Vec2f(30, 30),
+                    Vec2f(20, 0),
+                    Vec2f(30, -30)
+            }
     );
     pol2->position = Vec2f(-100, 100);
 
     auto tri2 = world.create<Triangle>(
-        Vec2f(0.0f, -35.0f),
-        Vec2f(35.0f, 35.0f),
-        Vec2f(-35.0f, 35.0f)
+            Vec2f(0.0f, -35.0f),
+            Vec2f(35.0f, 35.0f),
+            Vec2f(-35.0f, 35.0f)
     );
     tri2->position = Vec2f(100, -100);
 
     auto tri3 = world.create<Triangle>(
-        Vec2f(0.0f, -35.0f),
-        Vec2f(35.0f, 35.0f),
-        Vec2f(-35.0f, 35.0f)
+            Vec2f(0.0f, -35.0f),
+            Vec2f(35.0f, 35.0f),
+            Vec2f(-35.0f, 35.0f)
     );
     tri3->position = Vec2f(-100, 0);
 
+    int counter = 0;
+
     while (window.isOpen()) {
+        counter ++;
+
+        printf("%i\n", counter);
+
         // get the time passed since last frame
         sf::Time deltaTime = deltaClock.restart();
 
         // handle events (window, mouse, keyboard)
         window.handleEvents();
         window.updateCamera();
+
         // update imgui
         ImGui::SFML::Update(*window.window, deltaTime);
 
@@ -99,8 +106,6 @@ void App::run() {
         // *-*-*-*-*-*-* draw to the buffer -*-*-*-*-*-*-*
         // clear the window
         window.clear(COLOR_GRAY);
-
-        ImGui::Text("lastMousePosition %i, %i", window.lastMousePosition.x, window.lastMousePosition.y);
 
         // draw imgui
         window.drawUI(&world, paused, timeStep);
