@@ -1,7 +1,9 @@
-#include "Window.h"
+#pragma once
 
 class App {
 public:
+    bool paused = false;
+
     void run();
 
     void runDemo(int number);

@@ -7,14 +7,14 @@
 namespace fy {
     class FYZIKS_API Collision {
     public:
-        static bool intersects(fy::Body *body1, fy::Body *body2);
+        static bool intersects(Body *body1, Body *body2);
 
     private:
-        static bool intersectPolygons(fy::Polygon *pol1, fy::Polygon *pol2);
+        static bool intersectPolygons(Polygon *pol1, Polygon *pol2);
 
-        static bool intersectPolygonCircle(fy::Polygon *pol, fy::Circle *cir);
+        static bool intersectPolygonCircle(Polygon *pol, Circle *cir);
 
-        static bool intersectCircles(fy::Circle *cir1, fy::Circle *cir2);
+        static bool intersectCircles(Circle *cir1, Circle *cir2);
 
         static void projectVertices(const std::vector<Vec2f> &vertices, Vec2f axis, float &min, float &max);
 

@@ -2,16 +2,16 @@
 #include "Fyziks/Physics/Collision.h"
 
 namespace fy {
-    void World::step() {
+    void World::step(float deltaTime) {
         for (int i = 0; i < iterations; ++i) {
             // check for collisions
             broadPhase();
 
             // apply forces
-            applyForces();
+            applyForces(deltaTime);
 
             // move objects
-            moveObjects();
+            moveObjects(deltaTime);
         }
     }
 
@@ -35,24 +35,24 @@ namespace fy {
         }
     }
 
-    void World::applyForces() {
+    void World::applyForces(float deltaTime) {
         for (int i = 0; i < (int) bodies.size(); ++i) {
-            Body *body = bodies[i];
+            auto body = bodies[i];
 
             if (body->getInverseMass() == 0.0f)
                 continue;
 
-            body->velocity += timeStep * (gravity + body->getInverseMass() * body->force);
-            body->angularVelocity += timeStep * body->getInverseInertia() * body->torque;
+            body->velocity += deltaTime * (gravity + body->getInverseMass() * body->force);
+            body->angularVelocity += deltaTime * body->getInverseInertia() * body->torque;
         }
     }
 
-    void World::moveObjects() {
+    void World::moveObjects(float deltaTime) {
         for (int i = 0; i < (int) bodies.size(); ++i) {
-            Body *body = bodies[i];
+            auto body = bodies[i];
 
-            body->position += timeStep * body->velocity;
-            body->rotation += timeStep * body->angularVelocity;
+            body->position += deltaTime * body->velocity;
+            body->rotation += deltaTime * body->angularVelocity;
 
             body->force = Vec2f(0.0f, 0.0f);
             body->torque = 0.0f;

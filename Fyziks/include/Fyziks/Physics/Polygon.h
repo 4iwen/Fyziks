@@ -11,7 +11,7 @@ namespace fy {
     public:
         std::vector<Vec2f> vertices;
 
-        Polygon(std::vector<Vec2f> vertices) : vertices(std::move(vertices)), Body() {}
+        Polygon(std::vector<Vec2f> vertices) : vertices(std::move(vertices)) {}
 
         std::vector<Vec2f> getTranslatedVertices() const {
             Mat2x2 rotation(this->rotation);

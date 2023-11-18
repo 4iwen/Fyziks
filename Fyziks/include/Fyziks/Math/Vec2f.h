@@ -79,11 +79,11 @@ namespace fy {
         return {vec1.x - vec2.x, vec1.y - vec2.y};
     }
 
-    inline Vec2f operator*(const Vec2f &vec, float scalar) {
+    inline Vec2f operator*(const Vec2f &vec, const float scalar) {
         return {vec.x * scalar, vec.y * scalar};
     }
 
-    inline Vec2f operator*(float scalar, const Vec2f &vec) {
+    inline Vec2f operator*(const float scalar, const Vec2f &vec) {
         return {vec.x * scalar, vec.y * scalar};
     }
 }

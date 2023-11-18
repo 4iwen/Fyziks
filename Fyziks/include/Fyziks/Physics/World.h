@@ -5,26 +5,30 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 
 namespace fy {
     class FYZIKS_API World {
     public:
         std::vector<Body *> bodies;
-        fy::Vec2f gravity;
+        Vec2f gravity;
         int iterations;
-        float timeStep;
 
-        World() : gravity(fy::Vec2f(0, 9.81f)), iterations(8), timeStep(1.0f / 60.0f) {}
+        World() : gravity(Vec2f(0, 9.81f)), iterations(4) {}
 
-        void step();
+        void step(float deltaTime);
 
-        void add(Body *body) {
+        template<typename T, typename... Args>
+        T *create(Args &&... args) {
+            T *body = new T(std::forward<Args>(args)...);
             bodies.push_back(body);
+            return body;
         }
 
         void remove(Body *body) {
             for (auto it = bodies.begin(); it != bodies.end(); ++it) {
                 if (*it == body) {
+                    delete body;
                     bodies.erase(it);
                     return;
                 }
@@ -32,14 +36,17 @@ namespace fy {
         }
 
         void clear() {
+            for (auto body: bodies) {
+                delete body; // release memory
+            }
             bodies.clear();
         }
 
     private:
         void broadPhase();
 
-        void applyForces();
+        void applyForces(float deltaTime);
 
-        void moveObjects();
+        void moveObjects(float deltaTime);
     };
 }

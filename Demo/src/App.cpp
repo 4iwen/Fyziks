@@ -1,85 +1,128 @@
 #include "App.h"
 
+#include <imgui.h>
+
+#include "Window.h"
+
 using namespace fy;
 
 void App::run() {
     // create the window
-    std::unique_ptr<Window> window = std::make_unique<Window>("Fyziks Demo", sf::Vector2u(1440, 810));
+    auto window = Window("Fyziks Demo", sf::Vector2u(1440, 810));
     sf::Clock deltaClock;
-    window->setVsync(true);
 
+    // define time step for the simulation
+    float timeStep = 1.0f / 60.0f;
+    // variable to lock the elapsed time since last frame
+    float elapsed = 0.0f;
+
+    // world and objects
     World world;
 
-    Circle cir1(25.0f);
-    cir1.position = Vec2f(700, 300);
-    world.add(&cir1);
+    auto ground = world.create<Rectangle>(1000, 25);
+    ground->position = Vec2f(0, 350);
 
-    Circle cir2(35.0f);
-    cir2.position = Vec2f(700, 330);
-    world.add(&cir2);
+    auto cir1 = world.create<Circle>(25.0f);
+    cir1->position = Vec2f(0, 0);
+    cir1->mass = 0.5;
 
-    Rectangle rec1(50.0f, 50.0f);
-    rec1.position = Vec2f(720, 460);
-    world.add(&rec1);
+    auto cir2 = world.create<Circle>(35.0f);
+    cir2->position = Vec2f(100, 100);
 
-    Triangle tri1(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
-    tri1.position = Vec2f(820, 360);
-    world.add(&tri1);
+    auto rec1 = world.create<Rectangle>(50.0f, 50.0f);
+    rec1->position = Vec2f(100, 0);
 
-    Polygon pol1({Vec2f(-15.0f, -15.0f), Vec2f(-30.0f, 30.0f), Vec2f(15.0f, 15.0f), Vec2f(30.0f, -30.0f)});
-    pol1.position = Vec2f(820, 360);
-    world.add(&pol1);
+    auto tri1 = world.create<Triangle>(
+        Vec2f(0.0f, -35.0f),
+        Vec2f(35.0f, 35.0f),
+        Vec2f(-35.0f, 35.0f)
+    );
+    tri1->position = Vec2f(0, 100);
 
-    Polygon pol2({Vec2f(-30, -30), Vec2f(-20, 0), Vec2f(-30, 30), Vec2f(30, 30), Vec2f(20, 0), Vec2f(30, -30)});
-    pol2.position = Vec2f(820, 460);
-    world.add(&pol2);
+    auto pol1 = world.create<Polygon>(
+        std::vector<Vec2f>{
+            Vec2f(-15.0f, -15.0f),
+            Vec2f(-30.0f, 30.0f),
+            Vec2f(15.0f, 15.0f),
+            Vec2f(30.0f, -30.0f)
+        }
+    );
+    pol1->position = Vec2f(-100, -100);
 
-    Triangle tri2(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
-    tri2.position = Vec2f(720, 560);
-    world.add(&tri2);
+    auto pol2 = world.create<Polygon>(
+        std::vector<Vec2f>{
+            Vec2f(-30, -30),
+            Vec2f(-20, 0),
+            Vec2f(-30, 30),
+            Vec2f(30, 30),
+            Vec2f(20, 0),
+            Vec2f(30, -30)
+        }
+    );
+    pol2->position = Vec2f(-100, 100);
 
-    Triangle tri3(Vec2f(0.0f, -35.0f), Vec2f(35.0f, 35.0f), Vec2f(-35.0f, 35.0f));
-    tri3.position = Vec2f(820, 560);
-    world.add(&tri3);
+    auto tri2 = world.create<Triangle>(
+        Vec2f(0.0f, -35.0f),
+        Vec2f(35.0f, 35.0f),
+        Vec2f(-35.0f, 35.0f)
+    );
+    tri2->position = Vec2f(100, -100);
 
-    while (window->isOpen()) {
+    auto tri3 = world.create<Triangle>(
+        Vec2f(0.0f, -35.0f),
+        Vec2f(35.0f, 35.0f),
+        Vec2f(-35.0f, 35.0f)
+    );
+    tri3->position = Vec2f(-100, 0);
+
+    while (window.isOpen()) {
+        // get the time passed since last frame
+        sf::Time deltaTime = deltaClock.restart();
+
         // handle events (window, mouse, keyboard)
-        window->handleEvents();
-        window->updateCamera();
-        // clear the window
-        window->clear(COLOR_GRAY);
-
+        window.handleEvents();
+        window.updateCamera();
         // update imgui
-        ImGui::SFML::Update(*window->window, deltaClock.restart());
+        ImGui::SFML::Update(*window.window, deltaTime);
 
         // apply physics
-        world.step();
+        if (!paused) {
+            // add elapsed time
+            elapsed += deltaTime.asSeconds();
+
+            while (elapsed >= timeStep) {
+                world.step(timeStep);
+                elapsed -= timeStep;
+            }
+        }
 
         // *-*-*-*-*-*-* draw to the buffer -*-*-*-*-*-*-*
+        // clear the window
+        window.clear(COLOR_GRAY);
+
+        ImGui::Text("lastMousePosition %i, %i", window.lastMousePosition.x, window.lastMousePosition.y);
+
         // draw imgui
-        window->drawUI(&world);
+        window.drawUI(&world, paused, timeStep);
 
         // draw world
         for (int i = 0; i < world.bodies.size(); ++i) {
-            window->drawShape(world.bodies[i]);
+            window.drawBody(world.bodies[i], i);
         }
         // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
         // render everything from the buffer
-        window->render();
+        window.render();
     }
 }
 
 void App::demo1() {
-
 }
 
 void App::demo2() {
-
 }
 
 void App::demo3() {
-
 }
 
 void App::runDemo(int number) {

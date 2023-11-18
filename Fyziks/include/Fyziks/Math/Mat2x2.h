@@ -10,9 +10,10 @@ namespace fy {
         float r2c1, r2c2;
 
 
-        Mat2x2() : r1c1(1.0f), r1c2(0.0f), r2c1(0.0f), r2c2(1.0f) {}
+        Mat2x2() : r1c1(1.0f), r1c2(0.0f), r2c1(0.0f), r2c2(1.0f) {
+        }
 
-        Mat2x2(float angle) {
+        Mat2x2(const float angle) {
             float sinValue = sinf(angle);
             float cosValue = cosf(angle);
 
@@ -23,14 +24,14 @@ namespace fy {
         }
     };
 
-    inline Vec2f operator*(const fy::Mat2x2 &mat, const Vec2f &vec) {
+    inline Vec2f operator*(const Mat2x2&mat, const Vec2f&vec) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
         return {xValue, yValue};
     }
 
-    inline Vec2f operator*(const Vec2f &vec, const Mat2x2 &mat) {
+    inline Vec2f operator*(const Vec2f&vec, const Mat2x2&mat) {
         float xValue = mat.r1c1 * vec.x + mat.r1c2 * vec.y;
         float yValue = mat.r2c1 * vec.x + mat.r2c2 * vec.y;
 
