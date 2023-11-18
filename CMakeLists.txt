@@ -22,6 +22,9 @@ if (FYZIKS_BUILD_DEMO)
     set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
 
     add_subdirectory(vendor/imgui-sfml)
+
+    set(SFML_BUILD_AUDIO FALSE)
+    set(SFML_BUILD_NETWORK FALSE)
     add_subdirectory(vendor/SFML)
 
     add_subdirectory(Demo)

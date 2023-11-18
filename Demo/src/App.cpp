@@ -75,13 +75,7 @@ void App::run() {
     );
     tri3->position = Vec2f(-100, 0);
 
-    int counter = 0;
-
     while (window.isOpen()) {
-        counter ++;
-
-        printf("%i\n", counter);
-
         // get the time passed since last frame
         sf::Time deltaTime = deltaClock.restart();
 
