@@ -11,16 +11,16 @@ sf::Color defaultColor = COLOR_WHITE;
 sf::Color collisionColor = COLOR_RED;
 
 Window::Window(const std::string &title, const sf::Vector2u size) {
-    this->window = new sf::RenderWindow(
+    this->renderWindow = new sf::RenderWindow(
             sf::VideoMode(size.x, size.y), title, sf::Style::Default,
             sf::ContextSettings(0, 0, 8));
 
     this->view = sf::View(sf::FloatRect(0, 0, 0, 0));
-    window->setView(view);
+    renderWindow->setView(view);
 
     lastMousePosition = sf::Mouse::getPosition();
 
-    if (!SFML::Init(*window)) {
+    if (!SFML::Init(*renderWindow)) {
         printf("Initializing ImGui with SFML failed!\n");
         return;
     }
@@ -28,38 +28,38 @@ Window::Window(const std::string &title, const sf::Vector2u size) {
     GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
-void Window::clear(sf::Color color) const { window->clear(color); }
+void Window::clear(sf::Color color) const { renderWindow->clear(color); }
 
 void Window::render() const {
-    SFML::Render(*window);
-    window->display();
+    SFML::Render(*renderWindow);
+    renderWindow->display();
 }
 
 Window::~Window() {
     SFML::Shutdown();
-    delete this->window;
+    delete this->renderWindow;
 }
 
-bool Window::isOpen() const { return window->isOpen(); }
+bool Window::isOpen() const { return renderWindow->isOpen(); }
 
 void Window::handleEvents() {
     sf::Event event{};
 
-    while (window->pollEvent(event)) {
-        SFML::ProcessEvent(*window, event);
+    while (renderWindow->pollEvent(event)) {
+        SFML::ProcessEvent(*renderWindow, event);
 
         if (event.type == sf::Event::Closed) {
-            window->close();
+            renderWindow->close();
         }
         if (event.type == sf::Event::Resized) {
             sf::Vector2f viewCenter = view.getCenter();
             view.setSize((float) event.size.width, (float) event.size.height);
             view.setCenter(viewCenter);
-            window->setView(view);
+            renderWindow->setView(view);
         }
         if (event.type == sf::Event::MouseWheelScrolled) {
             view.zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
-            window->setView(view);
+            renderWindow->setView(view);
         }
     }
 }
@@ -71,32 +71,32 @@ void Window::updateCamera() {
     if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
         // calculate the offset between the current and last mouse positions
         sf::Vector2f offset =
-                window->mapPixelToCoords(currentMousePosition) - window->mapPixelToCoords(lastMousePosition);
+                renderWindow->mapPixelToCoords(currentMousePosition) - renderWindow->mapPixelToCoords(lastMousePosition);
         // move the view / camera
         view.move(-offset);
-        window->setView(view);
+        renderWindow->setView(view);
     }
     // update the last mouse position for the next frame
     lastMousePosition = currentMousePosition;
 }
 
 void Window::setVsync(bool enabled) const {
-    window->setVerticalSyncEnabled(enabled);
+    renderWindow->setVerticalSyncEnabled(enabled);
 }
 
 void Window::drawUI(World *world, bool &paused, float &timeStep) {
-    // make the whole window dock-able
+    // make the whole renderWindow dock-able
     DockSpaceOverViewport(GetMainViewport(),
                           ImGuiDockNodeFlags_PassthruCentralNode);
-    // metrics window
+    // metrics renderWindow
     drawMetrics();
-    // demos window
+    // demos renderWindow
     drawDemos();
     // physics config
     drawPhysicsConfig(world, paused, timeStep);
-    // objects
-    drawObjectConfig(world);
-    // imgui demo window
+    // bodies config
+    drawBodyConfig(world);
+    // imgui demo renderWindow
     // ShowDemoWindow();
 }
 
@@ -126,7 +126,7 @@ void Window::drawRectangle(Rectangle *rectangle) const {
     };
 
     // draw rectangle
-    window->draw(vertices, 5, sf::LineStrip);
+    renderWindow->draw(vertices, 5, sf::LineStrip);
 }
 
 void Window::drawCircle(Circle *circle) const {
@@ -153,12 +153,11 @@ void Window::drawCircle(Circle *circle) const {
     vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), color);
 
     // draw the circle
-    window->draw(vertices, segments + 2, sf::LineStrip);
+    renderWindow->draw(vertices, segments + 2, sf::LineStrip);
 }
 
 void Window::drawTriangle(Triangle *triangle) const {
     std::vector<Vec2f> translatedVertices = triangle->getTranslatedVertices();
-
 
     // get the 3 points of a triangle
     Vec2f v1 = translatedVertices[0];
@@ -181,7 +180,7 @@ void Window::drawTriangle(Triangle *triangle) const {
     };
 
     // draw the triangle
-    window->draw(vertices, 4, sf::LineStrip);
+    renderWindow->draw(vertices, 4, sf::LineStrip);
 }
 
 void Window::drawPolygon(Polygon *polygon) const {
@@ -207,7 +206,7 @@ void Window::drawPolygon(Polygon *polygon) const {
     vertices[verticesCount] = vertices[0];
 
     // draw the vertices
-    window->draw(vertices, verticesCount + 1, sf::LineStrip);
+    renderWindow->draw(vertices, verticesCount + 1, sf::LineStrip);
 
     // deallocate
     delete[] vertices;
@@ -236,7 +235,7 @@ void Window::drawBody(Body *body, int id) const {
 }
 
 void Window::drawMetrics() {
-    Begin("Metrics"); // begins a new window with a name
+    Begin("Metrics"); // begins a new renderWindow with a name
     Text("FPS: %.2f",
          GetIO().Framerate); // displays the fps as a text
     Text("Frame time: %.2f ms",
@@ -249,7 +248,7 @@ void Window::drawMetrics() {
     PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
               nullptr, 0.0f, 100.0f,
               ImVec2(0, 80)); // displays the frame times as a chart
-    End(); // ends the window
+    End(); // ends the renderWindow
 }
 
 void Window::drawDemos() {
@@ -309,8 +308,8 @@ void Window::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
     End();
 }
 
-void Window::drawObjectConfig(World *world) {
-    Begin("Objects");
+void Window::drawBodyConfig(World *world) {
+    Begin("Bodies");
 
     Text("Initial properties");
 
@@ -397,7 +396,7 @@ void Window::drawObjectConfig(World *world) {
     for (int i = 0; i < world->bodies.size(); ++i) {
         auto body = world->bodies[i];
 
-        std::string name = "Object [" + std::to_string(i) + "]";
+        std::string name = "Body [" + std::to_string(i) + "]";
 
         PushID(i);
         if (TreeNode(name.c_str())) {
@@ -428,7 +427,7 @@ void Window::drawObjectConfig(World *world) {
 void Window::drawID(Vec2f pos, int id) const {
     ImVec2 p;
 
-    sf::Vector2 viewPos = window->mapCoordsToPixel(sf::Vector2f(pos.x, pos.y));
+    sf::Vector2 viewPos = renderWindow->mapCoordsToPixel(sf::Vector2f(pos.x, pos.y));
     p.x = float(viewPos.x);
     p.y = float(viewPos.y);
 

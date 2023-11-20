@@ -12,7 +12,7 @@ namespace fy {
     private:
         static bool intersectPolygons(Polygon *pol1, Polygon *pol2, Vec2f &normal, float &depth);
 
-        static bool intersectPolygonCircle(Polygon *pol, Circle *cir, Vec2f &normal, float &depth);
+        static bool intersectPolygonCircle(Polygon *pol, Circle *cir, Vec2f &normal, float &depth, bool swapped);
 
         static Vec2f findArithmeticMean(const std::vector<Vec2f> &vertices);
 

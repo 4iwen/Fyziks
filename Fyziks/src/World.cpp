@@ -31,8 +31,9 @@ namespace fy {
                     bodies[i]->colliding = true;
                     bodies[j]->colliding = true;
 
-                    bodies[i]->move(-normal * (depth / 2.0f));
-                    bodies[j]->move(normal * (depth / 2.0f));
+                    Vec2f moveVector = normal * (depth / 2.0f);
+                    bodies[i]->move(-moveVector);
+                    bodies[j]->move(moveVector);
                 }
             }
         }

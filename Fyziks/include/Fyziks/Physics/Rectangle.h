@@ -17,9 +17,9 @@ namespace fy {
 
             // calculate the 4 vertices of the rectangle
             Vec2f v1 = Vec2f(-half.x, -half.y);
-            Vec2f v2 = Vec2f(half.x, -half.y);
+            Vec2f v2 = Vec2f(-half.x, half.y);
             Vec2f v3 = Vec2f(half.x, half.y);
-            Vec2f v4 = Vec2f(-half.x, half.y);
+            Vec2f v4 = Vec2f(half.x, -half.y);
 
             return {v1, v2, v3, v4};
         }

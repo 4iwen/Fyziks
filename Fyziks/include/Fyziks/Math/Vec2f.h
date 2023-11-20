@@ -36,12 +36,32 @@ namespace fy {
             this->y /= other.y;
         }
 
+        bool operator==(const Vec2f &other) {
+            if (this->x == other.x && this->y == other.y) {
+                return true;
+            }
+
+            return false;
+        }
+
+        bool operator!=(const Vec2f &other) {
+            if (this->x != other.x || this->y != other.y) {
+                return true;
+            }
+
+            return false;
+        }
+
         float length() {
             return sqrtf(this->x * this->x + this->y * this->y);
         }
 
         static float dot(const Vec2f &vec1, const Vec2f &vec2) {
             return vec1.x * vec2.x + vec1.y * vec2.y;
+        }
+
+        static float cross(const Vec2f &vec1, const Vec2f &vec2) {
+            return vec1.x * vec2.y - vec1.y * vec2.x;
         }
 
         static Vec2f normalize(Vec2f vec) {

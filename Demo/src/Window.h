@@ -17,7 +17,7 @@
 namespace fy {
     class Window {
     public:
-        sf::RenderWindow *window;
+        sf::RenderWindow *renderWindow;
         sf::View view;
         sf::Vector2i lastMousePosition;
 
@@ -48,7 +48,7 @@ namespace fy {
 
         void drawPhysicsConfig(World *world, bool &paused, float &timeStep);
 
-        void drawObjectConfig(World *world);
+        void drawBodyConfig(World *world);
 
         void drawRectangle(Rectangle *rectangle) const;
 
