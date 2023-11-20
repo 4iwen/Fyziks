@@ -2,95 +2,105 @@
 
 #include <cstdio>
 #include <cmath>
+#include <imgui.h>
 
 using namespace fy;
+using namespace ImGui;
 
 sf::Color defaultColor = COLOR_WHITE;
 sf::Color collisionColor = COLOR_RED;
 
-Window::Window(std::string title, sf::Vector2u size) {
-    this->window = std::make_unique<sf::RenderWindow>(
+Window::Window(const std::string &title, const sf::Vector2u size) {
+    this->renderWindow = new sf::RenderWindow(
             sf::VideoMode(size.x, size.y), title, sf::Style::Default,
             sf::ContextSettings(0, 0, 8));
-    this->view = std::make_unique<sf::View>(sf::FloatRect(0, 0, (float) size.x, (float) size.y));
-    window->setView(*view);
 
-    if (!ImGui::SFML::Init(*window)) {
+    this->view = sf::View(sf::FloatRect(0, 0, 0, 0));
+    renderWindow->setView(view);
+
+    lastMousePosition = sf::Mouse::getPosition();
+
+    if (!SFML::Init(*renderWindow)) {
         printf("Initializing ImGui with SFML failed!\n");
         return;
     }
 
-    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 }
 
-void Window::clear(sf::Color color) { window->clear(color); }
+void Window::clear(sf::Color color) const { renderWindow->clear(color); }
 
-void Window::render() {
-    ImGui::SFML::Render(*window);
-    window->display();
+void Window::render() const {
+    SFML::Render(*renderWindow);
+    renderWindow->display();
 }
 
-Window::~Window() { ImGui::SFML::Shutdown(); }
+Window::~Window() {
+    SFML::Shutdown();
+    delete this->renderWindow;
+}
 
-bool Window::isOpen() { return window->isOpen(); }
+bool Window::isOpen() const { return renderWindow->isOpen(); }
 
 void Window::handleEvents() {
     sf::Event event{};
 
-    while (window->pollEvent(event)) {
-        ImGui::SFML::ProcessEvent(*window, event);
+    while (renderWindow->pollEvent(event)) {
+        SFML::ProcessEvent(*renderWindow, event);
 
         if (event.type == sf::Event::Closed) {
-            window->close();
+            renderWindow->close();
         }
         if (event.type == sf::Event::Resized) {
-            sf::Vector2f viewCenter = view->getCenter();
-            view->setSize((float) event.size.width, (float) event.size.height);
-            view->setCenter(viewCenter);
-            window->setView(*view);
+            sf::Vector2f viewCenter = view.getCenter();
+            view.setSize((float) event.size.width, (float) event.size.height);
+            view.setCenter(viewCenter);
+            renderWindow->setView(view);
         }
         if (event.type == sf::Event::MouseWheelScrolled) {
-            view->zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
-            window->setView(*view);
-        }
-        if (event.type == sf::Event::MouseButtonPressed) {
-            lastMousePosition = sf::Mouse::getPosition();
+            view.zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
+            renderWindow->setView(view);
         }
     }
 }
 
 void Window::updateCamera() {
-    // when right mouse button is pressed calculate the new camera position and update it
+    // get the current mouse position
+    sf::Vector2i currentMousePosition = sf::Mouse::getPosition();
+    // check if the left mouse button is pressed
     if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
-        sf::Vector2i newMousePosition = sf::Mouse::getPosition();
-        sf::Vector2f offset = window->mapPixelToCoords(newMousePosition) - window->mapPixelToCoords(lastMousePosition);
-        view->move(-offset);
-        window->setView(*view);
-        lastMousePosition = newMousePosition;
+        // calculate the offset between the current and last mouse positions
+        sf::Vector2f offset =
+                renderWindow->mapPixelToCoords(currentMousePosition) - renderWindow->mapPixelToCoords(lastMousePosition);
+        // move the view / camera
+        view.move(-offset);
+        renderWindow->setView(view);
     }
+    // update the last mouse position for the next frame
+    lastMousePosition = currentMousePosition;
 }
 
-void Window::setVsync(bool enabled) {
-    window->setVerticalSyncEnabled(enabled);
+void Window::setVsync(bool enabled) const {
+    renderWindow->setVerticalSyncEnabled(enabled);
 }
 
-void Window::drawUI(World *world) {
-    // make the whole window dockable
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
-                                 ImGuiDockNodeFlags_PassthruCentralNode);
-    // metrics window
+void Window::drawUI(World *world, bool &paused, float &timeStep) {
+    // make the whole renderWindow dock-able
+    DockSpaceOverViewport(GetMainViewport(),
+                          ImGuiDockNodeFlags_PassthruCentralNode);
+    // metrics renderWindow
     drawMetrics();
-    // demos window
+    // demos renderWindow
     drawDemos();
     // physics config
-    drawPhysicsConfig(world);
-    // objects
-    drawObjectConfig(world);
-    // demo window
-    // ImGui::ShowDemoWindow();
+    drawPhysicsConfig(world, paused, timeStep);
+    // bodies config
+    drawBodyConfig(world);
+    // imgui demo renderWindow
+    // ShowDemoWindow();
 }
 
-void Window::drawRectangle(const Rectangle *rectangle) const {
+void Window::drawRectangle(Rectangle *rectangle) const {
     std::vector<Vec2f> translatedVertices = rectangle->getTranslatedVertices();
 
     // calculate the 4 corners of the rectangle
@@ -106,7 +116,7 @@ void Window::drawRectangle(const Rectangle *rectangle) const {
         color = defaultColor;
     }
 
-    // add the to vertex array
+    // add to the vertex array
     sf::Vertex vertices[5] = {
             sf::Vertex(sf::Vector2f(v1.x, v1.y), color),
             sf::Vertex(sf::Vector2f(v2.x, v2.y), color),
@@ -116,10 +126,10 @@ void Window::drawRectangle(const Rectangle *rectangle) const {
     };
 
     // draw rectangle
-    window->draw(vertices, 5, sf::LineStrip);
+    renderWindow->draw(vertices, 5, sf::LineStrip);
 }
 
-void Window::drawCircle(const Circle *circle) const {
+void Window::drawCircle(Circle *circle) const {
     // segments of the circle
     const int segments = 18;
     sf::Vertex vertices[segments + 2];
@@ -143,12 +153,11 @@ void Window::drawCircle(const Circle *circle) const {
     vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), color);
 
     // draw the circle
-    window->draw(vertices, segments + 2, sf::LineStrip);
+    renderWindow->draw(vertices, segments + 2, sf::LineStrip);
 }
 
-void Window::drawTriangle(const Triangle *triangle) const {
+void Window::drawTriangle(Triangle *triangle) const {
     std::vector<Vec2f> translatedVertices = triangle->getTranslatedVertices();
-
 
     // get the 3 points of a triangle
     Vec2f v1 = translatedVertices[0];
@@ -171,15 +180,16 @@ void Window::drawTriangle(const Triangle *triangle) const {
     };
 
     // draw the triangle
-    window->draw(vertices, 4, sf::LineStrip);
+    renderWindow->draw(vertices, 4, sf::LineStrip);
 }
 
-void Window::drawPolygon(const Polygon *polygon) const {
+void Window::drawPolygon(Polygon *polygon) const {
+    // get translated vertices of polygon
     std::vector<Vec2f> translatedVertices = polygon->getTranslatedVertices();
-
+    // get vertices count
     unsigned long verticesCount = translatedVertices.size();
-
-    sf::Vertex* vertices = new sf::Vertex[verticesCount + 1];
+    // create an array vertices + 1
+    auto *vertices = new sf::Vertex[verticesCount + 1];
 
     sf::Color color;
     if (polygon->colliding) {
@@ -188,125 +198,250 @@ void Window::drawPolygon(const Polygon *polygon) const {
         color = defaultColor;
     }
 
+    // go through the translated vertices and add them into the array of vertices for drawing
     for (int i = 0; i < verticesCount; i++) {
         Vec2f point = translatedVertices[i];
         vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), color);
     }
     vertices[verticesCount] = vertices[0];
 
-    window->draw(vertices, verticesCount + 1, sf::LineStrip);
+    // draw the vertices
+    renderWindow->draw(vertices, verticesCount + 1, sf::LineStrip);
 
+    // deallocate
     delete[] vertices;
 }
 
-void Window::drawShape(const Body *shape) const {
-    if (const auto *rectangle = dynamic_cast<const Rectangle *>(shape)) {
+void Window::drawBody(Body *body, int id) const {
+    // decide what shape we're dealing with
+    auto rectangle = body->castAndCheck<Rectangle>();
+    auto circle = body->castAndCheck<Circle>();
+    auto triangle = body->castAndCheck<Triangle>();
+    auto polygon = body->castAndCheck<Polygon>();
+
+    // draw it
+    if (rectangle) {
         drawRectangle(rectangle);
-    } else if (const auto *circle = dynamic_cast<const Circle *>(shape)) {
+    } else if (circle) {
         drawCircle(circle);
-    } else if (const auto *triangle = dynamic_cast<const Triangle *>(shape)) {
+    } else if (triangle) {
         drawTriangle(triangle);
-    } else if (const auto *polygon = dynamic_cast<const Polygon *>(shape)) {
+    } else if (polygon) {
         drawPolygon(polygon);
     }
+
+    // draw the id of the shape
+    drawID(body->position, id);
 }
 
 void Window::drawMetrics() {
-    ImGui::Begin("Metrics"); // begins a new window with a name
-    ImGui::Text("FPS: %.2f",
-                ImGui::GetIO().Framerate); // displays the fps as a text
-    ImGui::Text("Frame time: %.2f ms",
-                1000.0f /
-                ImGui::GetIO().Framerate); // displays the frame times as text
+    Begin("Metrics"); // begins a new renderWindow with a name
+    Text("FPS: %.2f",
+         GetIO().Framerate); // displays the fps as a text
+    Text("Frame time: %.2f ms",
+         1000.0f /
+         GetIO().Framerate); // displays the frame times as text
     static float values[90] = {0};
     static int values_offset = 0;
-    values[values_offset] = 1000.0f / ImGui::GetIO().Framerate;
+    values[values_offset] = 1000.0f / GetIO().Framerate;
     values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-    ImGui::PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
-                     nullptr, 0.0f, 100.0f,
-                     ImVec2(0, 80)); // displays the frame times as a chart
-    ImGui::End();                    // ends the window
+    PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
+              nullptr, 0.0f, 100.0f,
+              ImVec2(0, 80)); // displays the frame times as a chart
+    End(); // ends the renderWindow
 }
 
 void Window::drawDemos() {
-    ImGui::Begin("Examples");
-    if (ImGui::TreeNode("Basic")) {
-        if (ImGui::BeginTable("table1", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Basic example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
+    Begin("Examples");
+    if (TreeNode("Basic")) {
+        if (BeginTable("table1", 2)) {
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Basic example");
+            TableSetColumnIndex(1);
+            SmallButton("Load");
+            EndTable();
         }
 
-        ImGui::TreePop();
+        TreePop();
     }
-    if (ImGui::TreeNode("Advanced")) {
-        if (ImGui::BeginTable("table2", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Advanced example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
+    if (TreeNode("Advanced")) {
+        if (BeginTable("table2", 2)) {
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Advanced example");
+            TableSetColumnIndex(1);
+            SmallButton("Load");
+            EndTable();
         }
 
-        ImGui::TreePop();
+        TreePop();
     }
-    if (ImGui::TreeNode("Explosions")) {
-        if (ImGui::BeginTable("table3", 2)) {
-            ImGui::TableNextRow();
-            ImGui::TableSetColumnIndex(0);
-            ImGui::Text("Explosions example");
-            ImGui::TableSetColumnIndex(1);
-            ImGui::SmallButton("Load");
-            ImGui::EndTable();
+    if (TreeNode("Explosions")) {
+        if (BeginTable("table3", 2)) {
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Explosions example");
+            TableSetColumnIndex(1);
+            SmallButton("Load");
+            EndTable();
         }
 
-        ImGui::TreePop();
+        TreePop();
     }
-    ImGui::End();
+    End();
 }
 
-void Window::drawPhysicsConfig(World *world) {
-    ImGui::Begin("Physics config");
+void Window::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
+    Begin("Physics config");
 
-    ImGui::SliderInt("Iterations", &world->iterations, 1, 32);
+    Checkbox("Simulation paused", &paused);
+
+    SliderInt("Iterations", &world->iterations, 1, 32);
 
     static int steps = 60;
-    ImGui::SliderInt("Time step", &steps, 1, 120);
-    world->timeStep = 1.0f / (float) steps;
+    SliderInt("Time step", &steps, 1, 120);
+    timeStep = 1.0f / (float) steps;
 
-    ImGui::DragFloat2("Gravity", &world->gravity.x);
+    DragFloat2("Gravity", &world->gravity.x);
 
-    ImGui::End();
+    End();
 }
 
-void Window::drawObjectConfig(World *world) {
-    ImGui::Begin("Objects");
+void Window::drawBodyConfig(World *world) {
+    Begin("Bodies");
 
-    for (int i = 0; i < world->bodies.size(); ++i) {
-        Body *body = world->bodies[i];
+    Text("Initial properties");
 
-        std::string name = "obj [" + std::to_string(i) + "]";
+    static Vec2f initialPosition = Vec2f();
+    static float initialRotation = 0.0f;
+    static Vec2f initialVelocity = Vec2f();
+    static float initialAngularVelocity = 0.0f;
 
-        ImGui::PushID(i);
-        if (ImGui::TreeNode(name.c_str())) {
-            ImGui::DragFloat2("Position", &body->position.x);
-            ImGui::SliderAngle("Rotation", &body->rotation, 0.0f, 360.0f);
-            ImGui::DragFloat2("Velocity", &body->velocity.x);
-            ImGui::DragFloat("Angular velocity", &body->angularVelocity);
+    DragFloat2("Position", &initialPosition.x);
+    SliderAngle("Rotation", &initialRotation, 0.0f, 360.0f);
+    DragFloat2("Velocity", &initialVelocity.x, 0.01f);
+    DragFloat("Angular velocity", &initialAngularVelocity, 0.01f);
 
-            ImGui::Spacing();
+    Spacing();
 
-            ImGui::DragFloat("Mass", &body->mass);
-            ImGui::DragFloat("Inertia", &body->inertia);
-            ImGui::DragFloat("Friction", &body->friction);
+    static float initialMass = 0.0f;
+    static float initialInertia = 0.0f;
+    static float initialFriction = 0.2f;
+    DragFloat("Mass", &initialMass, 0.01f);
+    DragFloat("Inertia", &initialInertia, 0.01f);
+    DragFloat("Friction", &initialFriction, 0.01f);
 
-            ImGui::TreePop();
+
+    Spacing();
+
+    static const char *bodyTypes[] = {
+            "Triangle",
+            "Rectangle",
+            "Polygon",
+            "Circle",
+    };
+    static int currentBodyTypeSelected = 0;
+
+    Combo("Body type", &currentBodyTypeSelected, bodyTypes, IM_ARRAYSIZE(bodyTypes));
+
+    if (Button("Add body")) {
+        Body *body;
+
+        switch (currentBodyTypeSelected) {
+            default:
+            case 0:
+                body = world->create<Triangle>(
+                        Vec2f(-21.65, 12.5),
+                        Vec2f(21.65, 12.5),
+                        Vec2f(0, -25)
+                );
+                break;
+            case 1:
+                body = world->create<Rectangle>(50, 50);
+                break;
+            case 2:
+                body = world->create<Polygon>(std::vector{
+                        Vec2f(0, -25),
+                        Vec2f(-21.65, -12.5),
+                        Vec2f(-21.65, 12.5),
+                        Vec2f(0, 25),
+                        Vec2f(21.65, 12.5),
+                        Vec2f(21.65, -12.5),
+                });
+                break;
+            case 3:
+                body = world->create<Circle>(25);
+                break;
         }
-        ImGui::PopID();
+
+        body->position = initialPosition;
+        body->rotation = initialRotation;
+        body->velocity = initialVelocity;
+        body->angularVelocity = initialAngularVelocity;
+
+        body->mass = initialMass;
+        body->inertia = initialInertia;
+        body->friction = initialFriction;
     }
-    ImGui::End();
+
+    if (Button("Remove all bodies")) {
+        world->clear();
+    }
+
+    Spacing();
+
+    Text("%zu bodies", world->bodies.size());
+    BeginChild("Bodies", ImVec2(0, 0), true);
+    for (int i = 0; i < world->bodies.size(); ++i) {
+        auto body = world->bodies[i];
+
+        std::string name = "Body [" + std::to_string(i) + "]";
+
+        PushID(i);
+        if (TreeNode(name.c_str())) {
+            DragFloat2("Position", &body->position.x);
+            SliderAngle("Rotation", &body->rotation, 0.0f, 360.0f);
+            DragFloat2("Velocity", &body->velocity.x, 0.01f);
+            DragFloat("Angular velocity", &body->angularVelocity, 0.01f);
+
+            Spacing();
+
+            DragFloat("Mass", &body->mass, 0.01f);
+            DragFloat("Inertia", &body->inertia, 0.01f);
+            DragFloat("Friction", &body->friction, 0.01f);
+
+            if (Button("Delete")) {
+                world->remove(world->bodies[i]);
+            }
+
+            TreePop();
+        }
+        PopID();
+    }
+    EndChild();
+
+    End();
+}
+
+void Window::drawID(Vec2f pos, int id) const {
+    ImVec2 p;
+
+    sf::Vector2 viewPos = renderWindow->mapCoordsToPixel(sf::Vector2f(pos.x, pos.y));
+    p.x = float(viewPos.x);
+    p.y = float(viewPos.y);
+
+    SetNextWindowPos(ImVec2(0, 0));
+    Begin("ID", nullptr,
+          ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs |
+          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar |
+          ImGuiViewportFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+    std::string text_str = std::to_string(id);
+    const char *text_c_str = text_str.c_str();
+
+    ImVec2 textSize = CalcTextSize(text_c_str);
+    SetCursorPos(ImVec2(p.x - textSize.x / 2, p.y - textSize.y / 2));
+    Text("%s", text_c_str);
+    End();
 }

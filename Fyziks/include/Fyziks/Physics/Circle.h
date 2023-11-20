@@ -8,6 +8,6 @@ namespace fy {
     public:
         float radius;
 
-        Circle(float radius) : radius(radius), Body() {}
+        Circle(float radius) : radius(radius) {}
     };
 }

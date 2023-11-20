@@ -1,10 +1,9 @@
+#pragma once
+
 #include "SFML/Graphics/Color.hpp"
 #include "Fyziks/Fyziks.h"
 #include <SFML/Graphics.hpp>
-#include <array>
 #include <imgui-SFML.h>
-#include <imgui.h>
-#include <memory>
 
 #define COLOR_RED sf::Color(255, 0, 0)
 #define COLOR_GREEN sf::Color(0, 255, 0)
@@ -15,46 +14,50 @@
 #define COLOR_GRAY sf::Color(64, 64, 64)
 #define COLOR_BLACK sf::Color(0, 0, 0)
 
-class Window {
-public:
-    std::unique_ptr<sf::RenderWindow> window;
-    std::unique_ptr<sf::View> view;
-    sf::Vector2i lastMousePosition;
+namespace fy {
+    class Window {
+    public:
+        sf::RenderWindow *renderWindow;
+        sf::View view;
+        sf::Vector2i lastMousePosition;
 
-    Window(std::string title, sf::Vector2u size);
+        Window(const std::string &title, sf::Vector2u size);
 
-    ~Window();
+        ~Window();
 
-    bool isOpen();
+        bool isOpen() const;
 
-    void handleEvents();
+        void handleEvents();
 
-    void updateCamera();
+        void updateCamera();
 
-    void clear(sf::Color color);
+        void clear(sf::Color color) const;
 
-    void setVsync(bool enabled);
+        void setVsync(bool enabled) const;
 
-    void render();
+        void render() const;
 
-    void drawUI(fy::World *world);
+        void drawUI(World *world, bool &paused, float &timeStep);
 
-    void drawShape(const fy::Body *shape) const;
+        void drawBody(Body *body, int id) const;
 
-private:
-    void drawMetrics();
+    private:
+        void drawMetrics();
 
-    void drawDemos();
+        void drawDemos();
 
-    void drawPhysicsConfig(fy::World *world);
+        void drawPhysicsConfig(World *world, bool &paused, float &timeStep);
 
-    void drawObjectConfig(fy::World *world);
+        void drawBodyConfig(World *world);
 
-    void drawRectangle(const fy::Rectangle *rectangle) const;
+        void drawRectangle(Rectangle *rectangle) const;
 
-    void drawCircle(const fy::Circle *circle) const;
+        void drawCircle(Circle *circle) const;
 
-    void drawTriangle(const fy::Triangle *triangle) const;
+        void drawTriangle(Triangle *triangle) const;
 
-    void drawPolygon(const fy::Polygon *polygon) const;
-};
+        void drawPolygon(Polygon *polygon) const;
+
+        void drawID(Vec2f pos, int id) const;
+    };
+}
