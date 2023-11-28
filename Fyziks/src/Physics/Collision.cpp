@@ -3,10 +3,10 @@
 namespace fy {
     bool Collision::intersects(Body *body1, Body *body2, Vec2f &normal, float &depth) {
         // try to cast to either polygon or circle for both bodies
-        auto polygon1 = body1->castAndCheck<Polygon>();
-        auto polygon2 = body2->castAndCheck<Polygon>();
-        auto circle1 = body1->castAndCheck<Circle>();
-        auto circle2 = body2->castAndCheck<Circle>();
+        auto polygon1 = body1->tryCast<Polygon>();
+        auto polygon2 = body2->tryCast<Polygon>();
+        auto circle1 = body1->tryCast<Circle>();
+        auto circle2 = body2->tryCast<Circle>();
 
         // find out what shapes we're dealing with
         if (polygon1 && polygon2) {
@@ -27,10 +27,22 @@ namespace fy {
 
     // check for collision between two polygons
     bool Collision::intersectPolygons(Polygon *pol1, Polygon *pol2, Vec2f &normal, float &depth) {
-        // make sure to get rotated/moved vertices
-        std::vector<Vec2f> verts1 = pol1->getTranslatedVertices();
-        std::vector<Vec2f> verts2 = pol2->getTranslatedVertices();
+        std::vector<std::vector<Vec2f>> triangles1 = pol1->getTranslatedTriangles();
+        std::vector<std::vector<Vec2f>> triangles2 = pol2->getTranslatedTriangles();
 
+        for (int i = 0; i < triangles1.size(); ++i) {
+            for (int j = 0; j < triangles2.size(); ++j) {
+                if (intersectConvexPolygons(triangles1[i], triangles2[j], normal, depth)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    bool Collision::intersectConvexPolygons(const std::vector<Vec2f> &verts1, const std::vector<Vec2f> &verts2,
+                                            Vec2f &normal, float &depth) {
         // prepare the normal and depth values
         normal = Vec2f();
         depth = std::numeric_limits<float>::max();
@@ -53,7 +65,7 @@ namespace fy {
             projectVertices(verts2, axis, min2, max2);
 
             if (min1 >= max2 || min2 >= max1) {
-                // we know its not a collision -> return false
+                // we know it's not a collision -> return false
                 return false;
             }
 
@@ -83,7 +95,7 @@ namespace fy {
             projectVertices(verts2, axis, min2, max2);
 
             if (min1 >= max2 || min2 >= max1) {
-                // we know its not a collision -> return false
+                // we know it's not a collision -> return false
                 return false;
             }
 
@@ -175,9 +187,19 @@ namespace fy {
 
     // check for collision between polygon and circle
     bool Collision::intersectPolygonCircle(Polygon *pol, Circle *cir, Vec2f &normal, float &depth, bool swapped) {
-        // get vertices of the polygon
-        std::vector<Vec2f> verts = pol->getTranslatedVertices();
+        std::vector<std::vector<Vec2f>> triangles = pol->getTranslatedTriangles();
 
+        for (int i = 0; i < triangles.size(); ++i) {
+            if (intersectConvexPolygonCircle(triangles[i], cir, normal, depth, swapped)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    bool Collision::intersectConvexPolygonCircle(const std::vector<Vec2f> &verts, Circle *cir,
+                                                 Vec2f &normal, float &depth, bool swapped) {
         // prepare the normal and depth values
         normal = Vec2f();
         depth = std::numeric_limits<float>::max();

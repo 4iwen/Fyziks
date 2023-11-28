@@ -9,6 +9,7 @@
 #include "Fyziks/Math/Vec2f.h"
 #include "Fyziks/Math/Mat2x2.h"
 #include "Fyziks/Math/Misc.h"
+#include "Fyziks/Math/PolygonHelper.h"
 
 // world, objects and simulation
 #include "Fyziks/Physics/Body.h"

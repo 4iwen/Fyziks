@@ -1,14 +1,14 @@
 #include "App.h"
 
-#include <imgui.h>
-
 #include "Window.h"
+#include "Renderer.h"
 
 using namespace fy;
 
 void App::run() {
     // create the renderWindow
     auto window = Window("Fyziks Demo", sf::Vector2u(1440, 810));
+    auto renderer = Renderer(window.renderWindow);
     sf::Clock deltaClock;
 
     // define time step for the simulation
@@ -19,11 +19,11 @@ void App::run() {
     // world and objects
     World world;
 
-    auto ground = world.create<Rectangle>(25.0f, 25.0f);
-    ground->position = Vec2f(0, 0);
+    auto ground = world.create<Rectangle>(1000.0f, 50.0f);
+    ground->position = Vec2f(0, 350);
 
-    auto rec1 = world.create<Rectangle>(75.0f, 50.0f);
-    rec1->position = Vec2f(100, 0);
+    auto rec = world.create<Rectangle>(30.0f, 75.0f);
+    rec->position = Vec2f(0, 0);
 
     auto cir1 = world.create<Circle>(25.0f);
     cir1->position = Vec2f(0, 100);
@@ -32,7 +32,7 @@ void App::run() {
     cir2->position = Vec2f(100, 100);
 
     auto pol1 = world.create<Polygon>(
-            std::vector<Vec2f>{
+            std::vector{
                     Vec2f(-12.5f, -12.5f),
                     Vec2f(-12.5f, 12.5f),
                     Vec2f(12.5f, 12.5f),
@@ -42,7 +42,7 @@ void App::run() {
     pol1->position = Vec2f(-100, -100);
 
     auto pol2 = world.create<Polygon>(
-            std::vector<Vec2f>{
+            std::vector{
                     Vec2f(-30, -30),
                     Vec2f(-20, 0),
                     Vec2f(-30, 30),
@@ -54,11 +54,11 @@ void App::run() {
     pol2->position = Vec2f(-100, 100);
 
     auto tri1 = world.create<Triangle>(
-            Vec2f(0.0f, -35.0f),
-            Vec2f(35.0f, 35.0f),
-            Vec2f(-35.0f, 35.0f)
+            Vec2f(0.0f, 35.0f),
+            Vec2f(-35.0f, -35.0f),
+            Vec2f(35.0f, -35.0f)
     );
-    tri1->position = Vec2f(200, 100);
+    tri1->position = Vec2f(0, -100);
 
     auto tri2 = world.create<Triangle>(
             Vec2f(0.0f, -35.0f),
@@ -66,13 +66,6 @@ void App::run() {
             Vec2f(-35.0f, 35.0f)
     );
     tri2->position = Vec2f(100, -100);
-
-    auto tri3 = world.create<Triangle>(
-            Vec2f(0.0f, -35.0f),
-            Vec2f(35.0f, 35.0f),
-            Vec2f(-35.0f, 35.0f)
-    );
-    tri3->position = Vec2f(-100, 0);
 
     while (window.isOpen()) {
         // get the time passed since last frame
@@ -101,12 +94,10 @@ void App::run() {
         window.clear(COLOR_GRAY);
 
         // draw imgui
-        window.drawUI(&world, paused, timeStep);
+        renderer.drawUI(&world, paused, timeStep);
 
         // draw world
-        for (int i = 0; i < world.bodies.size(); ++i) {
-            window.drawBody(world.bodies[i], i);
-        }
+        renderer.drawWorld(&world);
         // *-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
         // render everything from the buffer

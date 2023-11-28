@@ -17,10 +17,6 @@ namespace fy {
 
     void World::solveCollisions() {
         for (int i = 0; i < bodies.size(); ++i) {
-            bodies[i]->colliding = false;
-        }
-
-        for (int i = 0; i < bodies.size(); ++i) {
             for (int j = i + 1; j < bodies.size(); ++j) {
                 Vec2f normal;
                 float depth;
@@ -28,9 +24,6 @@ namespace fy {
                 bool intersecting = Collision::intersects(bodies[i], bodies[j], normal, depth);
 
                 if (intersecting) {
-                    bodies[i]->colliding = true;
-                    bodies[j]->colliding = true;
-
                     Vec2f moveVector = normal * (depth / 2.0f);
                     bodies[i]->move(-moveVector);
                     bodies[j]->move(moveVector);

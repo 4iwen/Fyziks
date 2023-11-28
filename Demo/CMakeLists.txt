@@ -4,6 +4,7 @@ set(
         src/Demo.cpp
         src/App.cpp
         src/Window.cpp
+        src/Renderer.cpp
 )
 
 set(

@@ -6,12 +6,30 @@
 namespace fy {
     class FYZIKS_API Rectangle : public Polygon {
     public:
-        float width, height;
-
         Rectangle(float width, float height) : width(width), height(height),
                                                Polygon(calculateVertices(width, height)) {}
 
+        void setWidth(float w) {
+            this->width = w;
+            this->setVertices(calculateVertices(width, height));
+        }
+
+        void setHeight(float h) {
+            this->height = h;
+            this->setVertices(calculateVertices(width, height));
+        }
+
+        float getWidth() {
+            return width;
+        };
+
+        float getHeight() {
+            return height;
+        }
+
     private:
+        float width, height;
+
         std::vector<Vec2f> calculateVertices(float w, float h) {
             Vec2f half(w * 0.5f, h * 0.5f);
 

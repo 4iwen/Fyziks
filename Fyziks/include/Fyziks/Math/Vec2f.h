@@ -36,7 +36,7 @@ namespace fy {
             this->y /= other.y;
         }
 
-        bool operator==(const Vec2f &other) {
+        bool operator==(const Vec2f &other) const {
             if (this->x == other.x && this->y == other.y) {
                 return true;
             }
@@ -44,7 +44,7 @@ namespace fy {
             return false;
         }
 
-        bool operator!=(const Vec2f &other) {
+        bool operator!=(const Vec2f &other) const {
             if (this->x != other.x || this->y != other.y) {
                 return true;
             }
@@ -52,8 +52,12 @@ namespace fy {
             return false;
         }
 
-        float length() {
+        float length() const {
             return sqrtf(this->x * this->x + this->y * this->y);
+        }
+
+        bool operator<(Vec2f other) const {
+            return this->length() < other.length();
         }
 
         static float dot(const Vec2f &vec1, const Vec2f &vec2) {
