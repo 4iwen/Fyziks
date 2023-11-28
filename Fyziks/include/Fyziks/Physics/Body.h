@@ -22,8 +22,6 @@ namespace fy {
         Vec2f force;
         float torque;
 
-        bool colliding = true;
-
         void addForce(const Vec2f f) {
             this->force += f;
         }
@@ -57,7 +55,7 @@ namespace fy {
         }
 
         template<typename T>
-        T *castAndCheck() {
+        T *tryCast() {
             if (auto ptr = dynamic_cast<T *>(this)) {
                 return ptr;
             }

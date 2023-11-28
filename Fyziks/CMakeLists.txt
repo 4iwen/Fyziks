@@ -1,8 +1,9 @@
 set(
         SOURCE_FILES
-        src/World.cpp
-        src/Body.cpp
-        src/Collision.cpp
+        src/Physics/World.cpp
+        src/Physics/Body.cpp
+        src/Physics/Collision.cpp
+        src/Math/PolygonHelper.cpp
 )
 
 include_directories(include)
