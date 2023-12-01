@@ -177,8 +177,15 @@ namespace fy {
             return false;
         }
 
-        // calculate the direction in which the circles are going to be pushed apart & normalize it
-        normal = Vec2f::normalize(cir2->position - cir1->position);
+        // handle the case where the circles are in the same position
+        if (distance == 0) {
+            normal = Vec2f(1, 0);
+        } else {
+            // calculate the direction in which the circles are going to be pushed apart & normalize it
+            normal = Vec2f::normalize(cir2->position - cir1->position);
+        }
+
+
         // calculate the push amount
         depth = radii - distance;
 

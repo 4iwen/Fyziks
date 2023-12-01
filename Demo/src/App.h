@@ -1,16 +1,22 @@
 #pragma once
 
+#include <string>
+#include "Fyziks/Physics/World.h"
+
+using namespace fy;
+
 class App {
 public:
     bool paused = false;
 
     void run();
 
-    void runDemo(int number);
+    static void loadDemo(int i, World *world);
 
-    void demo1();
+private:
+    static void demo1(World *world);
 
-    void demo2();
+    static void demo2(World *world);
 
-    void demo3();
+    static void demo3(World *world);
 };

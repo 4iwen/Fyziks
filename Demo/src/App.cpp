@@ -6,7 +6,7 @@
 using namespace fy;
 
 void App::run() {
-    // create the renderWindow
+    // create the window
     auto window = Window("Fyziks Demo", sf::Vector2u(1440, 810));
     auto renderer = Renderer(window.renderWindow);
     sf::Clock deltaClock;
@@ -18,60 +18,13 @@ void App::run() {
 
     // world and objects
     World world;
-
-    auto ground = world.create<Rectangle>(1000.0f, 50.0f);
-    ground->position = Vec2f(0, 350);
-
-    auto rec = world.create<Rectangle>(30.0f, 75.0f);
-    rec->position = Vec2f(0, 0);
-
-    auto cir1 = world.create<Circle>(25.0f);
-    cir1->position = Vec2f(0, 100);
-
-    auto cir2 = world.create<Circle>(35.0f);
-    cir2->position = Vec2f(100, 100);
-
-    auto pol1 = world.create<Polygon>(
-            std::vector{
-                    Vec2f(-12.5f, -12.5f),
-                    Vec2f(-12.5f, 12.5f),
-                    Vec2f(12.5f, 12.5f),
-                    Vec2f(12.5f, -12.5f)
-            }
-    );
-    pol1->position = Vec2f(-100, -100);
-
-    auto pol2 = world.create<Polygon>(
-            std::vector{
-                    Vec2f(-30, -30),
-                    Vec2f(-20, 0),
-                    Vec2f(-30, 30),
-                    Vec2f(30, 30),
-                    Vec2f(20, 0),
-                    Vec2f(30, -30)
-            }
-    );
-    pol2->position = Vec2f(-100, 100);
-
-    auto tri1 = world.create<Triangle>(
-            Vec2f(0.0f, 35.0f),
-            Vec2f(-35.0f, -35.0f),
-            Vec2f(35.0f, -35.0f)
-    );
-    tri1->position = Vec2f(0, -100);
-
-    auto tri2 = world.create<Triangle>(
-            Vec2f(0.0f, -35.0f),
-            Vec2f(35.0f, 35.0f),
-            Vec2f(-35.0f, 35.0f)
-    );
-    tri2->position = Vec2f(100, -100);
+    demo1(&world);
 
     while (window.isOpen()) {
         // get the time passed since last frame
         sf::Time deltaTime = deltaClock.restart();
 
-        // handle events (renderWindow, mouse, keyboard)
+        // handle events (window, mouse, keyboard)
         window.handleEvents();
         window.updateCamera();
 
@@ -90,7 +43,7 @@ void App::run() {
         }
 
         // *-*-*-*-*-*-* draw to the buffer -*-*-*-*-*-*-*
-        // clear the renderWindow
+        // clear the window
         window.clear(COLOR_GRAY);
 
         // draw imgui
@@ -105,26 +58,51 @@ void App::run() {
     }
 }
 
-void App::demo1() {
-}
+void App::loadDemo(int i, World *world) {
+    world->clear();
 
-void App::demo2() {
-}
-
-void App::demo3() {
-}
-
-void App::runDemo(int number) {
-    switch (number) {
+    switch (i) {
         default:
+        case 0:
+            demo1(world);
+            break;
         case 1:
-            demo1();
+            demo2(world);
             break;
         case 2:
-            demo2();
-            break;
-        case 3:
-            demo3();
+            demo3(world);
             break;
     }
+}
+
+void App::demo1(World *world) {
+    auto ground = world->create<Rectangle>(1000.0f, 50.0f);
+    ground->position = Vec2f(0, 350);
+    ground->restitution = 1;
+    ground->isStatic = true;
+
+    auto rectangle = world->create<Rectangle>(50, 50);
+    rectangle->rotation = 1;
+    rectangle->mass = 1;
+    rectangle->position = Vec2f(-100, 0);
+
+    auto circle = world->create<Circle>(25);
+    circle->mass = 1;
+    circle->position = Vec2f(0, 0);
+
+    auto triangle = world->create<Triangle>(
+            Vec2f(0.0f, 35.0f),
+            Vec2f(-35.0f, -35.0f),
+            Vec2f(35.0f, -35.0f)
+    );
+    triangle->mass = 1;
+    triangle->position = Vec2f(100, 0);
+}
+
+void App::demo2(World *world) {
+
+}
+
+void App::demo3(World *world) {
+
 }

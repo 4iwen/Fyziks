@@ -25,28 +25,30 @@ namespace fy {
             return body;
         }
 
-        void remove(Body *body) {
+        bool remove(Body *body) {
             for (auto it = bodies.begin(); it != bodies.end(); ++it) {
                 if (*it == body) {
                     delete *it;
                     bodies.erase(it);
-                    return;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         void clear() {
             for (auto body: bodies) {
-                delete body; // release memory
+                delete body;
             }
             bodies.clear();
         }
 
     private:
-        void solveCollisions();
+        void checkForCollision();
+
+        void solveCollision(Body *body1, Body *body2, Vec2f normal, float depth);
 
         void applyForces(float deltaTime);
-
-        void moveObjects(float deltaTime);
     };
 }

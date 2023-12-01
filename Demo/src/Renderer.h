@@ -39,7 +39,7 @@ private:
     // imgui related
     void drawMetrics();
 
-    void drawDemos();
+    void drawDemos(World *world);
 
     void drawDebugConfig();
 

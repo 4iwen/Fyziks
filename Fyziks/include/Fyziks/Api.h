@@ -5,7 +5,7 @@
 #define PLATFORM_WINDOWS
 #endif
 
-#ifdef linux
+#ifdef __GNUC__
 #define PLATFORM_LINUX
 #endif
 

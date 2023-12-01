@@ -14,9 +14,11 @@ namespace fy {
         float angularVelocity;
 
         // properties
+        bool isStatic;
         float mass;
         float inertia;
         float friction;
+        float restitution;
 
         // applied forces
         Vec2f force;
@@ -39,11 +41,11 @@ namespace fy {
         }
 
         float getInverseMass() const {
-            if (mass != 0) {
+            if (!isStatic) {
                 return 1.0f / mass;
             }
 
-            return 0.0f;
+            return 0;
         }
 
         float getInverseInertia() const {
@@ -63,6 +65,8 @@ namespace fy {
         }
 
         virtual ~Body() = default;
+
+        void step(float deltaTime, Vec2f gravity);
 
     protected:
         Body();
