@@ -20,8 +20,6 @@ void App::run() {
     World world;
     demo1(&world);
 
-    sf::Clock performance;
-
     while (window.isOpen()) {
         // get the time passed since last frame
         sf::Time deltaTime = deltaClock.restart();
