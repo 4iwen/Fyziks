@@ -9,6 +9,8 @@ namespace fy {
     public:
         static bool intersects(Body *body1, Body *body2, Vec2f &normal, float &depth);
 
+        static bool intersectAABBs(AABB aabb1, AABB aabb2);
+
     private:
         static bool intersectPolygons(Polygon *pol1, Polygon *pol2, Vec2f &normal, float &depth);
 

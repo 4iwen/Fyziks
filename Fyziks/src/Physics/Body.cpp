@@ -18,7 +18,7 @@ namespace fy {
     }
 
     void Body::step(float deltaTime, Vec2f gravity) {
-        if (getInverseMass() == 0.0f) {
+        if (isStatic) {
             return;
         }
 

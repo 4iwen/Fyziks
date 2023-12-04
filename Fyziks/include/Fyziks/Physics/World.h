@@ -2,6 +2,7 @@
 
 #include "Fyziks/Api.h"
 #include "Body.h"
+#include "CollisionManifold.h"
 
 #include <vector>
 #include <map>
@@ -11,10 +12,11 @@ namespace fy {
     class FYZIKS_API World {
     public:
         std::vector<Body *> bodies;
+        std::vector<CollisionManifold> contactPoints;
         Vec2f gravity;
         int iterations;
 
-        World() : gravity(Vec2f(0, 9.81f)), iterations(4) {}
+        World() : gravity(Vec2f(0, 9.81f)), iterations(16) {}
 
         void step(float deltaTime);
 
@@ -47,8 +49,10 @@ namespace fy {
     private:
         void checkForCollision();
 
-        void solveCollision(Body *body1, Body *body2, Vec2f normal, float depth);
+        void solveCollision(const CollisionManifold &contact);
 
         void applyForces(float deltaTime);
+
+        void solveCollisions();
     };
 }

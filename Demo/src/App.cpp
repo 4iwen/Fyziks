@@ -20,6 +20,8 @@ void App::run() {
     World world;
     demo1(&world);
 
+    sf::Clock performance;
+
     while (window.isOpen()) {
         // get the time passed since last frame
         sf::Time deltaTime = deltaClock.restart();
@@ -30,6 +32,7 @@ void App::run() {
 
         // update imgui
         ImGui::SFML::Update(*window.renderWindow, deltaTime);
+
 
         // apply physics
         if (!paused) {
@@ -76,7 +79,7 @@ void App::loadDemo(int i, World *world) {
 }
 
 void App::demo1(World *world) {
-    auto ground = world->create<Rectangle>(1000.0f, 50.0f);
+    auto ground = world->create<Rectangle>(750.0f, 50.0f);
     ground->position = Vec2f(0, 350);
     ground->restitution = 1;
     ground->isStatic = true;
@@ -100,7 +103,33 @@ void App::demo1(World *world) {
 }
 
 void App::demo2(World *world) {
+    auto ground = world->create<Rectangle>(750.0f, 50.0f);
+    ground->position = Vec2f(0, 350);
+    ground->restitution = 1;
+    ground->isStatic = true;
 
+    auto ground1 = world->create<Rectangle>(750.0f, 50.0f);
+    ground1->position = Vec2f(0, -350);
+    ground1->restitution = 1;
+    ground1->isStatic = true;
+
+    auto wall = world->create<Rectangle>(50.0f, 750.0f);
+    wall->position = Vec2f(350, 0);
+    wall->restitution = 1;
+    wall->isStatic = true;
+
+    auto wall1 = world->create<Rectangle>(50.0f, 750.0f);
+    wall1->position = Vec2f(-350, 0);
+    wall1->restitution = 1;
+    wall1->isStatic = true;
+
+    for (int i = 0; i < 10; ++i) {
+        world->create<Circle>(25);
+    }
+
+    for (int i = 0; i < 10; ++i) {
+        world->create<Rectangle>(25, 25);
+    }
 }
 
 void App::demo3(World *world) {

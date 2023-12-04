@@ -3,16 +3,24 @@
 
 namespace fy {
     void World::step(float deltaTime) {
-        for (int i = 0; i < iterations; ++i) {
-            // collisions
-            checkForCollision();
+        deltaTime /= (float) iterations;
 
+        for (int i = 0; i < iterations; ++i) {
             // apply forces
             applyForces(deltaTime);
+
+            // check for collisions
+            checkForCollision();
+
+            // solve collisions
+            solveCollisions();
         }
     }
 
     void World::checkForCollision() {
+        // start with new contact points
+        contactPoints.clear();
+
         for (int i = 0; i < bodies.size(); ++i) {
             for (int j = i + 1; j < bodies.size(); ++j) {
                 Vec2f normal;
@@ -21,7 +29,13 @@ namespace fy {
                 Body *body1 = bodies[i];
                 Body *body2 = bodies[j];
 
+                // skip check between bodies that are static
                 if (body1->isStatic && body2->isStatic) {
+                    continue;
+                }
+
+                // skip check between bodies that are not close to each other
+                if (!Collision::intersectAABBs(body1->getAABB(), body2->getAABB())) {
                     continue;
                 }
 
@@ -36,14 +50,19 @@ namespace fy {
                         body2->move(normal * (depth / 2.0f));
                     }
 
-                    // simulate collision response
-                    solveCollision(body1, body2, normal, depth);
+                    CollisionManifold manifold(body1, body2, Vec2f(), Vec2f(), 0, normal, depth);
+                    contactPoints.push_back(manifold);
                 }
             }
         }
     }
 
-    void World::solveCollision(Body *body1, Body *body2, Vec2f normal, float depth) {
+    void World::solveCollision(const CollisionManifold &contact) {
+        Body *body1 = contact.body1;
+        Body *body2 = contact.body2;
+        Vec2f normal = contact.normal;
+        float depth = contact.depth;
+
         // calculate the velocity between the two bodies
         Vec2f relativeVelocity = body2->velocity - body1->velocity;
         // determine the velocity along the normal
@@ -71,8 +90,15 @@ namespace fy {
     }
 
     void World::applyForces(float deltaTime) {
-        for (int i = 0; i < (int) bodies.size(); ++i) {
+        for (int i = 0; i < bodies.size(); ++i) {
             bodies[i]->step(deltaTime, gravity);
+        }
+    }
+
+    void World::solveCollisions() {
+        for (int i = 0; i < contactPoints.size(); ++i) {
+            // simulate collision response
+            solveCollision(contactPoints[i]);
         }
     }
 }

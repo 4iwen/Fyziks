@@ -13,15 +13,17 @@ void Renderer::drawWorld(World *world) {
     for (int i = 0; i < world->bodies.size(); ++i) {
         auto body = world->bodies[i];
 
-        drawBody(body);
-
         if (drawIDs) {
             drawID(body->position, i);
         }
-
         if (drawBodyNormals) {
             drawNormals(body);
         }
+        if (drawAABBs) {
+            drawAABB(body);
+        }
+
+        drawBody(body);
     }
 }
 
@@ -36,7 +38,8 @@ void Renderer::drawCircle(Circle *circle) const {
     for (int i = 0; i < segments + 1; i++) {
         float angle = static_cast<float>(i) * angleIncrement;
         Vec2f point =
-                circle->position + rotation * Vec2f(circle->radius * cosf(angle), circle->radius * sinf(angle));
+                circle->position +
+                rotation * Vec2f(circle->radius * cosf(angle), circle->radius * sinf(angle));
         vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), COLOR_WHITE);
     }
     vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), COLOR_WHITE);
@@ -149,7 +152,7 @@ void Renderer::drawID(Vec2f pos, int id) const {
     text.setFont(font);
     text.setString(std::to_string(id));
     text.setCharacterSize(16);
-    text.setFillColor(sf::Color::White);
+    text.setFillColor(COLOR_CYAN);
     sf::FloatRect textBounds = text.getLocalBounds();
     text.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
     text.setPosition(pos.x, pos.y);
@@ -193,13 +196,36 @@ void Renderer::drawDemos(World *world) {
     Begin("Examples");
     if (TreeNode("Basic")) {
         if (BeginTable("table1", 2)) {
+            PushID(0);
             TableNextRow();
             TableSetColumnIndex(0);
-            Text("Basic example");
+            Text("Simple ground box");
             TableSetColumnIndex(1);
             if (SmallButton("Load")) {
                 App::loadDemo(0, world);
             }
+            PopID();
+
+            PushID(1);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Big box");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(1, world);
+            }
+            PopID();
+
+            PushID(2);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Example");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(2, world);
+            }
+            PopID();
+
             EndTable();
         }
 
@@ -219,7 +245,7 @@ void Renderer::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
         }
     }
 
-    SliderInt("Iterations", &world->iterations, 1, 32);
+    SliderInt("Iterations", &world->iterations, 1, 64);
 
     static int steps = 60;
     SliderInt("Time step", &steps, 1, 120);
@@ -373,6 +399,32 @@ void Renderer::drawDebugConfig() {
     Checkbox("Draw IDs", &drawIDs);
     Checkbox("Draw triangulation", &drawTriangulation);
     Checkbox("Draw normals", &drawBodyNormals);
+    Checkbox("Draw AABBs", &drawAABBs);
 
     End();
+}
+
+void Renderer::drawAABB(Body *body) {
+    AABB aabb = body->getAABB();
+
+    Vec2f bottomLeft = Vec2f(aabb.min.x, aabb.min.y);
+    Vec2f bottomRight = Vec2f(aabb.max.x, aabb.min.y);
+    Vec2f topRight = Vec2f(aabb.max.x, aabb.max.y);
+    Vec2f topLeft = Vec2f(aabb.min.x, aabb.max.y);
+
+    const int vertexCount = 5;
+    sf::Vertex vertices[vertexCount];
+    // bottom left
+    vertices[0] = sf::Vertex(sf::Vector2f(bottomLeft.x, bottomLeft.y), COLOR_TRANSPARENT_GRAY);
+    // bottom right
+    vertices[1] = sf::Vertex(sf::Vector2f(bottomRight.x, bottomRight.y), COLOR_TRANSPARENT_GRAY);
+    // top right
+    vertices[2] = sf::Vertex(sf::Vector2f(topRight.x, topRight.y), COLOR_TRANSPARENT_GRAY);
+    // top left
+    vertices[3] = sf::Vertex(sf::Vector2f(topLeft.x, topLeft.y), COLOR_TRANSPARENT_GRAY);
+    // join the vertices
+    vertices[4] = vertices[0];
+
+    // draw the vertices
+    renderWindow->draw(vertices, vertexCount, sf::LineStrip);
 }

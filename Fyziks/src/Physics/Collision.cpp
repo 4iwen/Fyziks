@@ -30,15 +30,28 @@ namespace fy {
         std::vector<std::vector<Vec2f>> triangles1 = pol1->getTranslatedTriangles();
         std::vector<std::vector<Vec2f>> triangles2 = pol2->getTranslatedTriangles();
 
+        bool isIntersecting = false;
+        float maxDepth = std::numeric_limits<float>::min();
+        Vec2f maxNormal;
+
         for (int i = 0; i < triangles1.size(); ++i) {
             for (int j = 0; j < triangles2.size(); ++j) {
-                if (intersectConvexPolygons(triangles1[i], triangles2[j], normal, depth)) {
-                    return true;
+                float tempDepth;
+                Vec2f tempNormal;
+                if (intersectConvexPolygons(triangles1[i], triangles2[j], tempNormal, tempDepth)) {
+                    if (tempDepth > maxDepth) {
+                        isIntersecting = true;
+                        maxDepth = tempDepth;
+                        maxNormal = tempNormal;
+                    }
                 }
             }
         }
 
-        return false;
+        depth = maxDepth;
+        normal = maxNormal;
+
+        return isIntersecting;
     }
 
     bool Collision::intersectConvexPolygons(const std::vector<Vec2f> &verts1, const std::vector<Vec2f> &verts2,
@@ -196,13 +209,26 @@ namespace fy {
     bool Collision::intersectPolygonCircle(Polygon *pol, Circle *cir, Vec2f &normal, float &depth, bool swapped) {
         std::vector<std::vector<Vec2f>> triangles = pol->getTranslatedTriangles();
 
+        bool isIntersecting = false;
+        float maxDepth = -std::numeric_limits<float>::max();
+        Vec2f maxNormal;
+
         for (int i = 0; i < triangles.size(); ++i) {
-            if (intersectConvexPolygonCircle(triangles[i], cir, normal, depth, swapped)) {
-                return true;
+            float tempDepth;
+            Vec2f tempNormal;
+            if (intersectConvexPolygonCircle(triangles[i], cir, tempNormal, tempDepth, swapped)) {
+                if (tempDepth > maxDepth) {
+                    isIntersecting = true;
+                    maxDepth = tempDepth;
+                    maxNormal = tempNormal;
+                }
             }
         }
 
-        return false;
+        depth = maxDepth;
+        normal = maxNormal;
+
+        return isIntersecting;
     }
 
     bool Collision::intersectConvexPolygonCircle(const std::vector<Vec2f> &verts, Circle *cir,
@@ -320,5 +346,16 @@ namespace fy {
         }
 
         return result;
+    }
+
+    bool Collision::intersectAABBs(AABB aabb1, AABB aabb2) {
+        // simple check for determining if two bodies are close to each other
+        // to avoid doing unnecessary calculations
+        if (aabb1.max.x <= aabb2.min.x || aabb2.max.x <= aabb1.min.x ||
+            aabb1.max.y <= aabb2.min.y || aabb2.max.y <= aabb1.min.y) {
+            return false;
+        }
+
+        return true;
     }
 }
