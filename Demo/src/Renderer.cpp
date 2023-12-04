@@ -1,5 +1,7 @@
 #include "Renderer.h"
 #include "../font/ProggyClean.h"
+#include "imgui_internal.h"
+#include "App.h"
 
 Renderer::Renderer(sf::RenderWindow *windowInstance) {
     renderWindow = windowInstance;
@@ -11,15 +13,17 @@ void Renderer::drawWorld(World *world) {
     for (int i = 0; i < world->bodies.size(); ++i) {
         auto body = world->bodies[i];
 
-        drawBody(body);
-
         if (drawIDs) {
             drawID(body->position, i);
         }
-
         if (drawBodyNormals) {
             drawNormals(body);
         }
+        if (drawAABBs) {
+            drawAABB(body);
+        }
+
+        drawBody(body);
     }
 }
 
@@ -34,7 +38,8 @@ void Renderer::drawCircle(Circle *circle) const {
     for (int i = 0; i < segments + 1; i++) {
         float angle = static_cast<float>(i) * angleIncrement;
         Vec2f point =
-                circle->position + rotation * Vec2f(circle->radius * cosf(angle), circle->radius * sinf(angle));
+                circle->position +
+                rotation * Vec2f(circle->radius * cosf(angle), circle->radius * sinf(angle));
         vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), COLOR_WHITE);
     }
     vertices[segments + 1] = sf::Vertex(sf::Vector2f(circle->position.x, circle->position.y), COLOR_WHITE);
@@ -90,51 +95,137 @@ void Renderer::drawBody(Body *body) const {
     }
 }
 
+void Renderer::drawNormals(Body *body) {
+    auto polygon = body->tryCast<Polygon>();
+    if (!polygon) {
+        return;
+    }
+
+    if (drawTriangulation) {
+        auto triangles = polygon->getTranslatedTriangles();
+        for (int i = 0; i < triangles.size(); ++i) {
+            auto vertices = triangles[i];
+
+            for (int j = 0; j < vertices.size(); ++j) {
+                Vec2f current = vertices[j % vertices.size()];
+                Vec2f next = vertices[(j + 1) % vertices.size()];
+                drawNormal(current, next);
+            }
+        }
+    } else {
+        auto vertices = polygon->getTranslatedVertices();
+        for (int j = 0; j < vertices.size(); ++j) {
+            Vec2f current = vertices[j % vertices.size()];
+            Vec2f next = vertices[(j + 1) % vertices.size()];
+            drawNormal(current, next);
+        }
+
+    }
+}
+
+void Renderer::drawNormal(const Vec2f &current, const Vec2f &next) {
+    // calculate the center of the edge
+    Vec2f center = (Vec2f(current.x, current.y) + Vec2f(next.x, next.y)) * 0.5f;
+    // calculate the direction vector
+    Vec2f dir = Vec2f(current.x, current.y) - Vec2f(next.x, next.y);
+    // get the normal of the direction vector
+    Vec2f normal(dir.y, -dir.x);
+    // normalize the vector
+    normal.normalize();
+
+    // specify where the second point of the normal will be
+    Vec2f to = center + normal * 4.0f;
+
+    // create the line
+    sf::Vertex line[2] = {
+            sf::Vertex(sf::Vector2f(center.x, center.y), COLOR_YELLOW),
+            sf::Vertex(sf::Vector2f(to.x, to.y), COLOR_YELLOW)
+    };
+
+    // draw the line
+    renderWindow->draw(line, sizeof(line) / sizeof(sf::Vertex), sf::LineStrip);
+}
+
+void Renderer::drawID(Vec2f pos, int id) const {
+    sf::Text text;
+
+    text.setFont(font);
+    text.setString(std::to_string(id));
+    text.setCharacterSize(16);
+    text.setFillColor(COLOR_CYAN);
+    sf::FloatRect textBounds = text.getLocalBounds();
+    text.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
+    text.setPosition(pos.x, pos.y);
+
+    renderWindow->draw(text);
+}
 
 void Renderer::drawUI(World *world, bool &paused, float &timeStep) {
-    // make the whole renderWindow dock-able
+    // make the whole window dock-able
     DockSpaceOverViewport(GetMainViewport(),
                           ImGuiDockNodeFlags_PassthruCentralNode);
-    // metrics renderWindow
+    // metrics
     drawMetrics();
-    // demos renderWindow
-    drawDemos();
+    // demos
+    drawDemos(world);
     // physics config
     drawPhysicsConfig(world, paused, timeStep);
     // bodies config
     drawBodyConfig(world);
     // debug config
     drawDebugConfig();
-    // imgui demo renderWindow
+    // imgui demo
     // ShowDemoWindow();
 }
 
 void Renderer::drawMetrics() {
-    Begin("Metrics"); // begins a new renderWindow with a name
-    Text("FPS: %.2f",
-         GetIO().Framerate); // displays the fps as a text
-    Text("Frame time: %.2f ms",
-         1000.0f /
-         GetIO().Framerate); // displays the frame times as text
-    static float values[90] = {0};
-    static int values_offset = 0;
-    values[values_offset] = 1000.0f / GetIO().Framerate;
-    values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-    PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), values_offset,
-              nullptr, 0.0f, 100.0f,
+    Begin("Metrics"); // begins a new window with a name
+    Text("FPS: %.2f", GetIO().Framerate); // displays the fps as a text
+    Text("Frame time: %.2f ms", 1000.0f / GetIO().Framerate); // displays the frame times as text
+    static float values[100] = {0};
+    static int valuesOffset = 0;
+    values[valuesOffset] = 1000.0f / GetIO().Framerate;
+    valuesOffset = (valuesOffset + 1) % IM_ARRAYSIZE(values);
+    PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), valuesOffset,
+              nullptr, 0.0f, 240.0f,
               ImVec2(0, 80)); // displays the frame times as a chart
-    End(); // ends the renderWindow
+    End(); // ends the window
 }
 
-void Renderer::drawDemos() {
+void Renderer::drawDemos(World *world) {
     Begin("Examples");
     if (TreeNode("Basic")) {
         if (BeginTable("table1", 2)) {
+            PushID(0);
             TableNextRow();
             TableSetColumnIndex(0);
-            Text("Basic example");
+            Text("Simple ground box");
             TableSetColumnIndex(1);
-            SmallButton("Load");
+            if (SmallButton("Load")) {
+                App::loadDemo(0, world);
+            }
+            PopID();
+
+            PushID(1);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Big box");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(1, world);
+            }
+            PopID();
+
+            PushID(2);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Example");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(2, world);
+            }
+            PopID();
+
             EndTable();
         }
 
@@ -147,8 +238,14 @@ void Renderer::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
     Begin("Physics config");
 
     Checkbox("Simulation paused", &paused);
+    if (paused) {
+        SameLine();
+        if (Button("Step")) {
+            world->step(timeStep);
+        }
+    }
 
-    SliderInt("Iterations", &world->iterations, 1, 32);
+    SliderInt("Iterations", &world->iterations, 1, 64);
 
     static int steps = 60;
     SliderInt("Time step", &steps, 1, 120);
@@ -176,12 +273,16 @@ void Renderer::drawBodyConfig(World *world) {
 
     Spacing();
 
-    static float initialMass = 0.0f;
-    static float initialInertia = 0.0f;
-    static float initialFriction = 0.2f;
-    DragFloat("Mass", &initialMass, 0.01f);
-    DragFloat("Inertia", &initialInertia, 0.01f);
-    DragFloat("Friction", &initialFriction, 0.01f);
+    static bool initialIsStatic = false;
+    static float initialMass = 1.0f;
+    static float initialInertia = 0.5f;
+    static float initialFriction = 0.5f;
+    static float initialRestitution = 0.5f;
+    Checkbox("Is static", &initialIsStatic);
+    DragFloat("Mass", &initialMass, 0.01f, 0.01f, 1000.0f);
+    DragFloat("Inertia", &initialInertia, 0.01f, 0, 1);
+    DragFloat("Friction", &initialFriction, 0.01f, 0, 1);
+    DragFloat("Restitution", &initialRestitution, 0.01f, 0, 1);
 
 
     Spacing();
@@ -244,9 +345,11 @@ void Renderer::drawBodyConfig(World *world) {
         body->velocity = initialVelocity;
         body->angularVelocity = initialAngularVelocity;
 
+        body->isStatic = initialIsStatic;
         body->mass = initialMass;
         body->inertia = initialInertia;
         body->friction = initialFriction;
+        body->restitution = initialRestitution;
     }
 
     if (Button("Remove all bodies")) {
@@ -271,11 +374,13 @@ void Renderer::drawBodyConfig(World *world) {
 
             Spacing();
 
-            DragFloat("Mass", &body->mass, 0.01f);
-            DragFloat("Inertia", &body->inertia, 0.01f);
-            DragFloat("Friction", &body->friction, 0.01f);
+            Checkbox("Is static", &body->isStatic);
+            DragFloat("Mass", &body->mass, 0.01f, 0.01f, 1000);
+            DragFloat("Inertia", &body->inertia, 0.01f, 0, 1);
+            DragFloat("Friction", &body->friction, 0.01f, 0, 1);
+            DragFloat("Restitution", &body->restitution, 0.01f, 0, 1);
 
-            if (Button("Delete")) {
+            if (Button("Remove")) {
                 world->remove(world->bodies[i]);
             }
 
@@ -288,77 +393,38 @@ void Renderer::drawBodyConfig(World *world) {
     End();
 }
 
-void Renderer::drawID(Vec2f pos, int id) const {
-    sf::Text text;
-
-    text.setFont(font);
-    text.setString(std::to_string(id));
-    text.setCharacterSize(16);
-    text.setFillColor(sf::Color::White);
-    sf::FloatRect textBounds = text.getLocalBounds();
-    text.setOrigin(textBounds.left + textBounds.width / 2.0f, textBounds.top + textBounds.height / 2.0f);
-    text.setPosition(pos.x, pos.y);
-
-    renderWindow->draw(text);
-}
-
 void Renderer::drawDebugConfig() {
     Begin("Debug");
 
     Checkbox("Draw IDs", &drawIDs);
     Checkbox("Draw triangulation", &drawTriangulation);
     Checkbox("Draw normals", &drawBodyNormals);
+    Checkbox("Draw AABBs", &drawAABBs);
 
     End();
 }
 
-void Renderer::drawNormals(Body *body) {
-    auto polygon = body->tryCast<Polygon>();
-    if (!polygon) {
-        return;
-    }
+void Renderer::drawAABB(Body *body) {
+    AABB aabb = body->getAABB();
 
-    if (drawTriangulation) {
-        auto triangles = polygon->getTranslatedTriangles();
-        for (int i = 0; i < triangles.size(); ++i) {
-            auto vertices = triangles[i];
+    Vec2f bottomLeft = Vec2f(aabb.min.x, aabb.min.y);
+    Vec2f bottomRight = Vec2f(aabb.max.x, aabb.min.y);
+    Vec2f topRight = Vec2f(aabb.max.x, aabb.max.y);
+    Vec2f topLeft = Vec2f(aabb.min.x, aabb.max.y);
 
-            for (int j = 0; j < vertices.size(); ++j) {
-                Vec2f current = vertices[j % vertices.size()];
-                Vec2f next = vertices[(j + 1) % vertices.size()];
-                drawNormal(current, next);
-            }
-        }
-    } else {
-        auto vertices = polygon->getTranslatedVertices();
-        for (int j = 0; j < vertices.size(); ++j) {
-            Vec2f current = vertices[j % vertices.size()];
-            Vec2f next = vertices[(j + 1) % vertices.size()];
-            drawNormal(current, next);
-        }
+    const int vertexCount = 5;
+    sf::Vertex vertices[vertexCount];
+    // bottom left
+    vertices[0] = sf::Vertex(sf::Vector2f(bottomLeft.x, bottomLeft.y), COLOR_TRANSPARENT_GRAY);
+    // bottom right
+    vertices[1] = sf::Vertex(sf::Vector2f(bottomRight.x, bottomRight.y), COLOR_TRANSPARENT_GRAY);
+    // top right
+    vertices[2] = sf::Vertex(sf::Vector2f(topRight.x, topRight.y), COLOR_TRANSPARENT_GRAY);
+    // top left
+    vertices[3] = sf::Vertex(sf::Vector2f(topLeft.x, topLeft.y), COLOR_TRANSPARENT_GRAY);
+    // join the vertices
+    vertices[4] = vertices[0];
 
-    }
-}
-
-void Renderer::drawNormal(const Vec2f &current, const Vec2f &next) {
-    // calculate the center of the edge
-    Vec2f center = (Vec2f(current.x, current.y) + Vec2f(next.x, next.y)) * 0.5f;
-    // calculate the direction vector
-    Vec2f dir = Vec2f(current.x, current.y) - Vec2f(next.x, next.y);
-    // get the normal of the direction vector
-    Vec2f normal(dir.y, -dir.x);
-    // normalize the vector
-    normal.normalize();
-
-    // specify where the second point of the normal will be
-    Vec2f to = center + normal * 4.0f;
-
-    // create the line
-    sf::Vertex line[2] = {
-            sf::Vertex(sf::Vector2f(center.x, center.y), COLOR_YELLOW),
-            sf::Vertex(sf::Vector2f(to.x, to.y), COLOR_YELLOW)
-    };
-
-    // draw the line
-    renderWindow->draw(line, sizeof(line) / sizeof(sf::Vertex), sf::LineStrip);
+    // draw the vertices
+    renderWindow->draw(vertices, vertexCount, sf::LineStrip);
 }

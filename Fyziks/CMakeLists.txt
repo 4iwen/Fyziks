@@ -9,9 +9,9 @@ set(
 include_directories(include)
 
 if (FYZIKS_BUILD_SHARED)
-    add_compile_definitions(FYZIKS_SHARED FYZIKS_EXPORTS)
     add_library(Fyziks SHARED ${SOURCE_FILES})
+    target_compile_definitions(Fyziks PRIVATE FYZIKS_SHARED FYZIKS_EXPORTS)
 else ()
-    add_compile_definitions(FYZIKS_EXPORTS)
     add_library(Fyziks STATIC ${SOURCE_FILES})
+    target_compile_definitions(Fyziks PRIVATE FYZIKS_EXPORTS)
 endif ()

@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include <imgui-SFML.h>
 
-
 namespace fy {
     class Window {
     public:

@@ -7,9 +7,32 @@ namespace fy {
         velocity = Vec2f();
         angularVelocity = 0.0f;
 
-        mass = 0;
-        inertia = 0;
-        friction = 0.2f;
+        isStatic = false;
+        mass = 1.0f;
+        inertia = 0.5f;
+        friction = 0.5f;
+        restitution = 0.5f;
+
+        force = Vec2f();
+        torque = 0.0f;
+    }
+
+    void Body::step(float deltaTime, Vec2f gravity) {
+        if (isStatic) {
+            return;
+        }
+
+        // Newton's law of motion
+        // Vec2f acceleration = force / mass;
+        // velocity += acceleration * deltaTime;
+        velocity += gravity * deltaTime;
+        position += velocity * deltaTime;
+
+        // Newton's law of inertia
+        rotation += angularVelocity * deltaTime;
+
+        // body->velocity += deltaTime * (gravity + body->getInverseMass() * body->force);
+        // angularVelocity += deltaTime * getInverseInertia() * torque;
 
         force = Vec2f();
         torque = 0.0f;

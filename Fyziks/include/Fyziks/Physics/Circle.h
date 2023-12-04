@@ -9,5 +9,12 @@ namespace fy {
         float radius;
 
         Circle(float radius) : radius(radius) {}
+
+        AABB getAABB() override {
+            return {
+                    position.x - radius, position.y - radius,
+                    position.x + radius, position.y + radius
+            };
+        }
     };
 }

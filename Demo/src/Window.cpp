@@ -50,9 +50,7 @@ void Window::handleEvents() {
             renderWindow->close();
         }
         if (event.type == sf::Event::Resized) {
-            sf::Vector2f viewCenter = view.getCenter();
             view.setSize((float) event.size.width, (float) event.size.height);
-            view.setCenter(viewCenter);
             renderWindow->setView(view);
         }
         if (event.type == sf::Event::MouseWheelScrolled) {

@@ -8,15 +8,17 @@
 using namespace fy;
 using namespace ImGui;
 
-#define COLOR_RED       sf::Color(255,   0,   0)
-#define COLOR_GREEN     sf::Color(  0, 255,   0)
-#define COLOR_BLUE      sf::Color(  0,   0, 255)
-#define COLOR_YELLOW    sf::Color(255, 255,   0)
-#define COLOR_ORANGE    sf::Color(255, 128,   0)
-#define COLOR_PURPLE    sf::Color(255,   0, 255)
-#define COLOR_WHITE     sf::Color(255, 255, 255)
-#define COLOR_GRAY      sf::Color( 64,  64,  64)
-#define COLOR_BLACK     sf::Color(  0,   0,   0)
+#define COLOR_RED                   sf::Color(255,   0,   0, 255)
+#define COLOR_GREEN                 sf::Color(  0, 255,   0, 255)
+#define COLOR_BLUE                  sf::Color(  0,   0, 255, 255)
+#define COLOR_YELLOW                sf::Color(255, 255,   0, 255)
+#define COLOR_MAGENTA               sf::Color(255,   0, 255, 255)
+#define COLOR_CYAN                  sf::Color(  0, 255, 255, 255)
+#define COLOR_ORANGE                sf::Color(255, 128,   0, 255)
+#define COLOR_WHITE                 sf::Color(255, 255, 255, 255)
+#define COLOR_GRAY                  sf::Color( 64,  64,  64, 255)
+#define COLOR_TRANSPARENT_GRAY      sf::Color(128, 128, 128, 128)
+#define COLOR_BLACK                 sf::Color(  0,   0,   0, 255)
 
 class Renderer {
 public:
@@ -35,11 +37,12 @@ private:
     bool drawIDs = true;
     bool drawTriangulation = false;
     bool drawBodyNormals = false;
+    bool drawAABBs = false;
 
     // imgui related
     void drawMetrics();
 
-    void drawDemos();
+    void drawDemos(World *world);
 
     void drawDebugConfig();
 
@@ -59,4 +62,6 @@ private:
     void drawNormals(Body *body);
 
     void drawNormal(const Vec2f &current, const Vec2f &next);
+
+    void drawAABB(Body *body);
 };

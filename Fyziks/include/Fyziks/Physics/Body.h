@@ -3,6 +3,7 @@
 #include <memory>
 #include "Fyziks/Api.h"
 #include "Fyziks/Math/Vec2f.h"
+#include "Fyziks/Physics/AABB.h"
 
 namespace fy {
     class FYZIKS_API Body {
@@ -14,13 +15,17 @@ namespace fy {
         float angularVelocity;
 
         // properties
+        bool isStatic;
         float mass;
         float inertia;
         float friction;
+        float restitution;
 
         // applied forces
         Vec2f force;
         float torque;
+
+        void step(float deltaTime, Vec2f gravity);
 
         void addForce(const Vec2f f) {
             this->force += f;
@@ -34,16 +39,20 @@ namespace fy {
             this->position += vec;
         }
 
-        void moveTo(const Vec2f to) {
-            this->position = to;
+        void moveTo(const Vec2f pos) {
+            this->position = pos;
+        }
+
+        void moveTo(float x, float y) {
+            this->position = Vec2f(x, y);
         }
 
         float getInverseMass() const {
-            if (mass != 0) {
+            if (!isStatic) {
                 return 1.0f / mass;
             }
 
-            return 0.0f;
+            return 0;
         }
 
         float getInverseInertia() const {
@@ -59,8 +68,11 @@ namespace fy {
             if (auto ptr = dynamic_cast<T *>(this)) {
                 return ptr;
             }
+
             return nullptr;
         }
+
+        virtual AABB getAABB() = 0;
 
         virtual ~Body() = default;
 

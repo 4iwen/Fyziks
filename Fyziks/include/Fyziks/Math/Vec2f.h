@@ -110,4 +110,12 @@ namespace fy {
     inline Vec2f operator*(const float scalar, const Vec2f &vec) {
         return {vec.x * scalar, vec.y * scalar};
     }
+
+    inline Vec2f operator/(const Vec2f &vec, const float scalar) {
+        return {vec.x / scalar, vec.y / scalar};
+    }
+
+    inline Vec2f operator/(const float scalar, const Vec2f &vec) {
+        return {vec.x / scalar, vec.y / scalar};
+    }
 }
