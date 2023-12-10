@@ -8,7 +8,10 @@ namespace fy {
     public:
         float radius;
 
-        Circle(float radius) : radius(radius) {}
+        Circle(float radius) : radius(radius) {
+            this->mass = PIf * radius * radius * density;
+            this->inertia = 0.5f * mass * radius * radius;
+        }
 
         AABB getAABB() override {
             return {

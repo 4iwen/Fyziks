@@ -3,6 +3,7 @@
 #include "Fyziks/Api.h"
 #include "Body.h"
 #include "CollisionManifold.h"
+#include "ContactPair.h"
 
 #include <vector>
 #include <map>
@@ -12,6 +13,7 @@ namespace fy {
     class FYZIKS_API World {
     public:
         std::vector<Body *> bodies;
+        std::vector<ContactPair> contactPairs;
         std::vector<CollisionManifold> contactPoints;
         Vec2f gravity;
         int iterations;
@@ -47,12 +49,14 @@ namespace fy {
         }
 
     private:
-        void checkForCollision();
+        void broadPhase();
+
+        void narrowPhase();
 
         void solveCollision(const CollisionManifold &contact);
 
         void applyForces(float deltaTime);
 
-        void solveCollisions();
+        void separateBodies(Body*body1, Body*body2, Vec2f mtv);
     };
 }

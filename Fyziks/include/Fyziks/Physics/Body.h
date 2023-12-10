@@ -16,6 +16,7 @@ namespace fy {
 
         // properties
         bool isStatic;
+        float density;
         float mass;
         float inertia;
         float friction;
@@ -56,7 +57,7 @@ namespace fy {
         }
 
         float getInverseInertia() const {
-            if (inertia != 0) {
+            if (!isStatic) {
                 return 1.0f / inertia;
             }
 

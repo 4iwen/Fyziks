@@ -13,9 +13,12 @@ namespace fy {
     public:
         Polygon(std::vector<Vec2f> vertices) {
             setVertices(std::move(vertices));
+
+            this->mass = calculateMass();
+            this->inertia = calculateInertia();
         }
 
-        std::vector<Vec2f> getTranslatedVertices() {
+        std::vector<Vec2f> getTransformedVertices() {
             Mat2x2 rotation(this->rotation);
 
             std::vector<Vec2f> result = this->vertices;
@@ -31,7 +34,7 @@ namespace fy {
             return vertices;
         }
 
-        std::vector<std::vector<Vec2f>> getTranslatedTriangles() {
+        std::vector<std::vector<Vec2f>> getTransformedTriangles() {
             Mat2x2 rotation(this->rotation);
 
             std::vector<std::vector<Vec2f>> result = this->triangles;
@@ -60,17 +63,17 @@ namespace fy {
         std::vector<std::vector<Vec2f>> triangles;
 
         AABB getAABB() override {
-            auto translatedVertices = getTranslatedVertices();
+            auto transformedVertices = getTransformedVertices();
 
-            if (translatedVertices.empty()) {
+            if (transformedVertices.empty()) {
                 return {};
             }
 
-            Vec2f min = translatedVertices[0];
-            Vec2f max = translatedVertices[0];
+            Vec2f min = transformedVertices[0];
+            Vec2f max = transformedVertices[0];
 
-            for (int i = 0; i < translatedVertices.size(); ++i) {
-                auto vertex = translatedVertices[i];
+            for (int i = 0; i < transformedVertices.size(); ++i) {
+                auto vertex = transformedVertices[i];
 
                 if (vertex.x < min.x) {
                     min.x = vertex.x;
@@ -88,6 +91,57 @@ namespace fy {
 
 
             return {min, max};
+        }
+
+        float calculateMass() {
+            float totalArea = 0.0f;
+
+            auto tris = this->getTriangles();
+
+            for (int i = 0; i < tris.size(); ++i) {
+                Vec2f point1 = tris[i][0];
+                Vec2f point2 = tris[i][1];
+                Vec2f point3 = tris[i][2];
+
+                totalArea += PolygonHelper::calculateTriangleArea(point1, point2, point3);
+            }
+
+            return density * totalArea;
+        }
+
+        float calculateInertia() {
+            float totalInertia = 0.0f;
+
+            auto tris = this->getTriangles();
+
+            for (int i = 0; i < tris.size(); ++i) {
+                // get triangle points
+                Vec2f point1 = tris[i][0];
+                Vec2f point2 = tris[i][1];
+                Vec2f point3 = tris[i][2];
+
+                // get the centroid of the triangles
+                Vec2f centroid = (point1 + point2 + point3) / 3.0f;
+
+                // calculate the area
+                float area = PolygonHelper::calculateTriangleArea(point1, point2, point3);
+
+                // calculate the mass of triangle
+                float mass = density * area;
+
+                // calculate the distance from the centroid of triangle to the position of polygon
+                float distance = Vec2f::distance(centroid, this->position);
+
+                // add the inertia of one triangle
+                totalInertia += mass * distance * distance;
+            }
+
+            Vec2f centroidOfPolygon = PolygonHelper::calculateCentroid(this->getVertices());
+
+            float distToCenterOfMass = Vec2f(this->position - centroidOfPolygon).length();
+            totalInertia += this->mass * distToCenterOfMass * distToCenterOfMass;
+
+            return totalInertia;
         }
     };
 }

@@ -19,4 +19,8 @@ private:
     static void demo2(World *world);
 
     static void demo3(World *world);
+
+    static void demo4(World *world);
+
+    static void demo5(World *world);
 };

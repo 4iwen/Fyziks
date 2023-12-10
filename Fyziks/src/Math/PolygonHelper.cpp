@@ -131,4 +131,36 @@ namespace fy {
         // if the cross product is positive, the angle is convex
         return Vec2f::cross(prevEdge, nextEdge) > 0.0f;
     }
+
+    float PolygonHelper::calculateTriangleArea(const Vec2f &point1, const Vec2f &point2, const Vec2f &point3) {
+        float area = 0.5f * std::abs(
+                point1.x * (point2.y - point3.y) + point2.x * (point3.y - point1.y) + point3.x * (point1.y - point2.y)
+        );
+        return area;
+    }
+
+    Vec2f PolygonHelper::calculateCentroid(const std::vector<Vec2f> &vertices) {
+        float area = 0;
+        float centroidX = 0;
+        float centroidY = 0;
+
+        int j = (int) vertices.size() - 1;
+
+        for (int i = 0; i < vertices.size(); i++) {
+            float secondFactor = (vertices[j].x * vertices[i].y) - (vertices[i].x * vertices[j].y);
+
+            area += secondFactor;
+
+            centroidX += (vertices[j].x + vertices[i].x) * secondFactor;
+            centroidY += (vertices[j].y + vertices[i].y) * secondFactor;
+
+            j = i;
+        }
+
+        area *= 0.5;
+        centroidX /= (6.0f * area);
+        centroidY /= (6.0f * area);
+
+        return {centroidX, centroidY};
+    }
 }

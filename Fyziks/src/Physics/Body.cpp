@@ -8,8 +8,8 @@ namespace fy {
         angularVelocity = 0.0f;
 
         isStatic = false;
-        mass = 1.0f;
-        inertia = 0.5f;
+
+        density = 1000.0f;
         friction = 0.5f;
         restitution = 0.5f;
 
@@ -25,7 +25,16 @@ namespace fy {
         // Newton's law of motion
         // Vec2f acceleration = force / mass;
         // velocity += acceleration * deltaTime;
-        velocity += gravity * deltaTime;
+        // velocity += gravity * deltaTime;
+        // position += velocity * deltaTime;
+
+        // Newton's law of motion
+
+        // Vec2f acceleration = gravity * mass;
+        // velocity += acceleration * deltaTime;
+        // velocity += gravity * deltaTime;
+
+        velocity += deltaTime * (gravity + getInverseMass() * force);
         position += velocity * deltaTime;
 
         // Newton's law of inertia

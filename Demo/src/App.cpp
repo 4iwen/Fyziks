@@ -18,6 +18,7 @@ void App::run() {
 
     // world and objects
     World world;
+    world.gravity = Vec2f(0, 160);
     demo1(&world);
 
     while (window.isOpen()) {
@@ -73,6 +74,12 @@ void App::loadDemo(int i, World *world) {
         case 2:
             demo3(world);
             break;
+        case 3:
+            demo4(world);
+            break;
+        case 4:
+            demo5(world);
+            break;
     }
 }
 
@@ -83,20 +90,16 @@ void App::demo1(World *world) {
     ground->isStatic = true;
 
     auto rectangle = world->create<Rectangle>(50, 50);
-    rectangle->rotation = 1;
-    rectangle->mass = 1;
     rectangle->position = Vec2f(-100, 0);
 
     auto circle = world->create<Circle>(25);
-    circle->mass = 1;
     circle->position = Vec2f(0, 0);
 
     auto triangle = world->create<Triangle>(
-            Vec2f(0.0f, 35.0f),
-            Vec2f(-35.0f, -35.0f),
-            Vec2f(35.0f, -35.0f)
+            Vec2f(-35.0f, 35.0f),
+            Vec2f(35.0f, 35.0f),
+            Vec2f(0.0f, -35.0f)
     );
-    triangle->mass = 1;
     triangle->position = Vec2f(100, 0);
 }
 
@@ -131,5 +134,44 @@ void App::demo2(World *world) {
 }
 
 void App::demo3(World *world) {
+    auto ramp = world->create<Rectangle>(200.0f, 20.0f);
+    ramp->rotation = PIf / 6.0;
+    ramp->position = Vec2f(0, 400);
+    ramp->isStatic = true;
 
+    auto sphere = world->create<Circle>(25);
+    sphere->position = Vec2f(0, 150);
+
+    auto box = world->create<Rectangle>(40, 40);
+    box->position = Vec2f(0, 100);
+}
+
+void App::demo4(World *world) {
+    auto ground = world->create<Rectangle>(750.0f, 50.0f);
+    ground->position = Vec2f(0, 350);
+    ground->restitution = 1;
+    ground->isStatic = true;
+
+    auto ground1 = world->create<Rectangle>(750.0f, 50.0f);
+    ground1->position = Vec2f(0, -350);
+    ground1->restitution = 1;
+    ground1->isStatic = true;
+
+    auto wall = world->create<Rectangle>(50.0f, 750.0f);
+    wall->position = Vec2f(350, 0);
+    wall->restitution = 1;
+    wall->isStatic = true;
+
+    auto wall1 = world->create<Rectangle>(50.0f, 750.0f);
+    wall1->position = Vec2f(-350, 0);
+    wall1->restitution = 1;
+    wall1->isStatic = true;
+}
+
+void App::demo5(World *world) {
+    for (int i = 0; i < 100; ++i) {
+        auto drop = world->create<Rectangle>(2, 20);
+        drop->position = Vec2f(rand() % 700 - 350, rand() % 700 - 350);
+        drop->restitution = 0.1f;
+    }
 }

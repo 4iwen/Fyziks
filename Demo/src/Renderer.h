@@ -9,6 +9,7 @@ using namespace fy;
 using namespace ImGui;
 
 #define COLOR_RED                   sf::Color(255,   0,   0, 255)
+#define COLOR_TRANSPARENT_RED       sf::Color(255,   0,   0, 128)
 #define COLOR_GREEN                 sf::Color(  0, 255,   0, 255)
 #define COLOR_BLUE                  sf::Color(  0,   0, 255, 255)
 #define COLOR_YELLOW                sf::Color(255, 255,   0, 255)
@@ -38,9 +39,10 @@ private:
     bool drawTriangulation = false;
     bool drawBodyNormals = false;
     bool drawAABBs = false;
+    bool drawContactPoints = false;
 
     // imgui related
-    void drawMetrics();
+    void drawMetrics(World *world);
 
     void drawDemos(World *world);
 
@@ -64,4 +66,6 @@ private:
     void drawNormal(const Vec2f &current, const Vec2f &next);
 
     void drawAABB(Body *body);
+
+    void drawContactPoint(CollisionManifold &contact);
 };

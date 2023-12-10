@@ -25,6 +25,14 @@ void Renderer::drawWorld(World *world) {
 
         drawBody(body);
     }
+
+    if (drawContactPoints) {
+        for (int i = 0; i < world->contactPoints.size(); ++i) {
+            auto contactPoint = world->contactPoints[i];
+
+            drawContactPoint(contactPoint);
+        }
+    }
 }
 
 void Renderer::drawCircle(Circle *circle) const {
@@ -49,16 +57,16 @@ void Renderer::drawCircle(Circle *circle) const {
 }
 
 void Renderer::drawPolygon(Polygon *polygon) const {
-    // get translated vertices of polygon
-    std::vector<Vec2f> translatedVertices = polygon->getTranslatedVertices();
+    // get transformed vertices of polygon
+    std::vector<Vec2f> transformedVertices = polygon->getTransformedVertices();
     // get vertices count
-    unsigned long verticesCount = translatedVertices.size();
+    unsigned long verticesCount = transformedVertices.size();
     // create an array vertices + 1
     auto *vertices = new sf::Vertex[verticesCount + 1];
 
-    // go through the translated vertices and add them into the array of vertices for drawing
+    // go through the transformed vertices and add them into the array of vertices for drawing
     for (int i = 0; i < verticesCount; i++) {
-        Vec2f point = translatedVertices[i];
+        Vec2f point = transformedVertices[i];
         vertices[i] = sf::Vertex(sf::Vector2f(point.x, point.y), COLOR_WHITE);
     }
     vertices[verticesCount] = vertices[0];
@@ -67,7 +75,7 @@ void Renderer::drawPolygon(Polygon *polygon) const {
     renderWindow->draw(vertices, verticesCount + 1, sf::LineStrip);
 
     if (drawTriangulation) {
-        std::vector<std::vector<Vec2f>> triangles = polygon->getTranslatedTriangles();
+        std::vector<std::vector<Vec2f>> triangles = polygon->getTransformedTriangles();
         for (int i = 0; i < triangles.size(); ++i) {
             std::vector<Vec2f> triangle = triangles[i];
             sf::Vertex vs[4];
@@ -102,7 +110,7 @@ void Renderer::drawNormals(Body *body) {
     }
 
     if (drawTriangulation) {
-        auto triangles = polygon->getTranslatedTriangles();
+        auto triangles = polygon->getTransformedTriangles();
         for (int i = 0; i < triangles.size(); ++i) {
             auto vertices = triangles[i];
 
@@ -113,7 +121,7 @@ void Renderer::drawNormals(Body *body) {
             }
         }
     } else {
-        auto vertices = polygon->getTranslatedVertices();
+        auto vertices = polygon->getTransformedVertices();
         for (int j = 0; j < vertices.size(); ++j) {
             Vec2f current = vertices[j % vertices.size()];
             Vec2f next = vertices[(j + 1) % vertices.size()];
@@ -165,7 +173,7 @@ void Renderer::drawUI(World *world, bool &paused, float &timeStep) {
     DockSpaceOverViewport(GetMainViewport(),
                           ImGuiDockNodeFlags_PassthruCentralNode);
     // metrics
-    drawMetrics();
+    drawMetrics(world);
     // demos
     drawDemos(world);
     // physics config
@@ -178,7 +186,7 @@ void Renderer::drawUI(World *world, bool &paused, float &timeStep) {
     // ShowDemoWindow();
 }
 
-void Renderer::drawMetrics() {
+void Renderer::drawMetrics(World *world) {
     Begin("Metrics"); // begins a new window with a name
     Text("FPS: %.2f", GetIO().Framerate); // displays the fps as a text
     Text("Frame time: %.2f ms", 1000.0f / GetIO().Framerate); // displays the frame times as text
@@ -189,6 +197,9 @@ void Renderer::drawMetrics() {
     PlotLines("Frame\ntimes", values, IM_ARRAYSIZE(values), valuesOffset,
               nullptr, 0.0f, 240.0f,
               ImVec2(0, 80)); // displays the frame times as a chart
+    Text("%zu bodies", world->bodies.size());
+    Text("%zu contacts", world->contactPoints.size());
+
     End(); // ends the window
 }
 
@@ -219,10 +230,30 @@ void Renderer::drawDemos(World *world) {
             PushID(2);
             TableNextRow();
             TableSetColumnIndex(0);
-            Text("Example");
+            Text("Ramp");
             TableSetColumnIndex(1);
             if (SmallButton("Load")) {
                 App::loadDemo(2, world);
+            }
+            PopID();
+
+            PushID(3);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Empty big box");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(3, world);
+            }
+            PopID();
+
+            PushID(4);
+            TableNextRow();
+            TableSetColumnIndex(0);
+            Text("Rain");
+            TableSetColumnIndex(1);
+            if (SmallButton("Load")) {
+                App::loadDemo(4, world);
             }
             PopID();
 
@@ -274,16 +305,13 @@ void Renderer::drawBodyConfig(World *world) {
     Spacing();
 
     static bool initialIsStatic = false;
-    static float initialMass = 1.0f;
-    static float initialInertia = 0.5f;
+    static float initialDensity = 1000;
     static float initialFriction = 0.5f;
     static float initialRestitution = 0.5f;
     Checkbox("Is static", &initialIsStatic);
-    DragFloat("Mass", &initialMass, 0.01f, 0.01f, 1000.0f);
-    DragFloat("Inertia", &initialInertia, 0.01f, 0, 1);
+    DragFloat("Density", &initialDensity, 1.0f, 1, 10000);
     DragFloat("Friction", &initialFriction, 0.01f, 0, 1);
     DragFloat("Restitution", &initialRestitution, 0.01f, 0, 1);
-
 
     Spacing();
 
@@ -346,8 +374,7 @@ void Renderer::drawBodyConfig(World *world) {
         body->angularVelocity = initialAngularVelocity;
 
         body->isStatic = initialIsStatic;
-        body->mass = initialMass;
-        body->inertia = initialInertia;
+        body->density = initialDensity;
         body->friction = initialFriction;
         body->restitution = initialRestitution;
     }
@@ -375,6 +402,7 @@ void Renderer::drawBodyConfig(World *world) {
             Spacing();
 
             Checkbox("Is static", &body->isStatic);
+            DragFloat("Density", &body->density, 1.0f, 1, 10000);
             DragFloat("Mass", &body->mass, 0.01f, 0.01f, 1000);
             DragFloat("Inertia", &body->inertia, 0.01f, 0, 1);
             DragFloat("Friction", &body->friction, 0.01f, 0, 1);
@@ -400,6 +428,7 @@ void Renderer::drawDebugConfig() {
     Checkbox("Draw triangulation", &drawTriangulation);
     Checkbox("Draw normals", &drawBodyNormals);
     Checkbox("Draw AABBs", &drawAABBs);
+    Checkbox("Draw contact points", &drawContactPoints);
 
     End();
 }
@@ -427,4 +456,30 @@ void Renderer::drawAABB(Body *body) {
 
     // draw the vertices
     renderWindow->draw(vertices, vertexCount, sf::LineStrip);
+}
+
+void Renderer::drawContactPoint(CollisionManifold &contact) {
+    float pointSize = 4;
+
+    sf::Vector2f pos1(contact.contactPoint1.x - pointSize / 2, contact.contactPoint1.y - pointSize / 2);
+
+    sf::RectangleShape point1;
+    point1.setSize(sf::Vector2f(pointSize, pointSize));
+    point1.setPosition(pos1);
+    point1.setFillColor(COLOR_TRANSPARENT_RED);
+
+    renderWindow->draw(point1);
+
+    if (contact.contactCount > 1) {
+        sf::Vector2f pos2(contact.contactPoint2.x - pointSize / 2, contact.contactPoint2.y - pointSize / 2);
+
+
+        sf::RectangleShape point2;
+        point2.setSize(sf::Vector2f(pointSize, pointSize));
+        point2.setPosition(pos2);
+        point2.setFillColor(COLOR_TRANSPARENT_RED);
+
+        renderWindow->draw(point2);
+    }
+
 }
