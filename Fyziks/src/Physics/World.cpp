@@ -236,16 +236,4 @@ namespace fy {
             body2->angularVelocity += Vec2f::cross(r2List[i], frictionImpulse) * body2->getInverseInertia();
         }
     }
-
-    Body *World::getBodyAt(Vec2f position) {
-        for (int i = 0; i < bodies.size(); ++i) {
-            Body *body = bodies[i];
-
-            if (Collision::isPointInside(body, position)) {
-                return body;
-            }
-        }
-
-        return nullptr;
-    }
 }
