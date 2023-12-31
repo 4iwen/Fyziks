@@ -1,6 +1,5 @@
 #include "Window.h"
 
-#include <cstdio>
 #include <imgui.h>
 
 using namespace fy;
@@ -18,8 +17,7 @@ Window::Window(const std::string &title, const sf::Vector2u size) {
 
     // initialize SFML
     if (!SFML::Init(*renderWindow)) {
-        printf("Initializing ImGui with SFML failed!\n");
-        return;
+        throw std::runtime_error("Initializing ImGui with SFML failed!");
     }
 
     // enable docking for imgui
@@ -40,7 +38,7 @@ Window::~Window() {
 
 bool Window::isOpen() const { return renderWindow->isOpen(); }
 
-void Window::handleEvents() {
+void Window::handleEvents(World *world, BodyProperties *bodyProps) {
     sf::Event event{};
 
     while (renderWindow->pollEvent(event)) {
@@ -57,6 +55,55 @@ void Window::handleEvents() {
             if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
                 view.zoom(1.0f + -event.mouseWheelScroll.delta * 0.1f);
                 renderWindow->setView(view);
+            }
+        }
+        if (event.type == sf::Event::MouseButtonPressed) {
+            if (event.mouseButton.button == sf::Mouse::Button::Left) {
+                if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow)) {
+                    Body *body;
+
+                    switch (bodyProps->bodyType) {
+                        case CIRCLE:
+                            body = world->create<Circle>(25);
+                            break;
+                        case TRIANGLE:
+                            body = world->create<Triangle>(
+                                    Vec2f(-21.65, 12.5),
+                                    Vec2f(21.65, 12.5),
+                                    Vec2f(0, -25)
+                            );
+                            break;
+                        case RECTANGLE:
+                            body = world->create<Rectangle>(75, 50);
+                            break;
+                        case POLYGON:
+                            body = world->create<Polygon>(std::vector{
+                                    Vec2f(0, -25),
+                                    Vec2f(-5, -5),
+                                    Vec2f(-25, 0),
+                                    Vec2f(-5, 5),
+                                    Vec2f(0, 25),
+                                    Vec2f(5, 5),
+                                    Vec2f(25, 0),
+                                    Vec2f(5, -5),
+                            });
+                            break;
+                    }
+
+
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(*renderWindow);
+                    sf::Vector2f position = renderWindow->mapPixelToCoords(mousePosition);
+
+                    body->position = Vec2f(position.x, position.y);
+                    body->rotation = bodyProps->rotation;
+                    body->velocity = bodyProps->velocity;
+                    body->angularVelocity = bodyProps->angularVelocity;
+                    body->isStatic = bodyProps->isStatic;
+                    body->mass = bodyProps->mass;
+                    body->restitution = bodyProps->restitution;
+                    body->staticFriction = bodyProps->staticFriction;
+                    body->dynamicFriction = bodyProps->dynamicFriction;
+                }
             }
         }
     }

@@ -22,8 +22,9 @@ void Renderer::drawWorld(World *world) {
         if (drawAABBs) {
             drawAABB(body);
         }
-
-        drawBody(body);
+        if (drawBodies) {
+            drawBody(body);
+        }
     }
 
     if (drawContactPoints) {
@@ -127,7 +128,6 @@ void Renderer::drawNormals(Body *body) {
             Vec2f next = vertices[(j + 1) % vertices.size()];
             drawNormal(current, next);
         }
-
     }
 }
 
@@ -168,7 +168,7 @@ void Renderer::drawID(Vec2f pos, int id) const {
     renderWindow->draw(text);
 }
 
-void Renderer::drawUI(World *world, bool &paused, float &timeStep) {
+void Renderer::drawUI(World *world, BodyProperties *bodyProps, bool &paused, float &timeStep) {
     // make the whole window dock-able
     DockSpaceOverViewport(GetMainViewport(),
                           ImGuiDockNodeFlags_PassthruCentralNode);
@@ -179,7 +179,7 @@ void Renderer::drawUI(World *world, bool &paused, float &timeStep) {
     // physics config
     drawPhysicsConfig(world, paused, timeStep);
     // bodies config
-    drawBodyConfig(world);
+    drawBodyConfig(world, bodyProps);
     // debug config
     drawDebugConfig();
     // imgui demo
@@ -207,55 +207,25 @@ void Renderer::drawDemos(World *world) {
     Begin("Examples");
     if (TreeNode("Basic")) {
         if (BeginTable("table1", 2)) {
-            PushID(0);
-            TableNextRow();
-            TableSetColumnIndex(0);
-            Text("Simple ground box");
-            TableSetColumnIndex(1);
-            if (SmallButton("Load")) {
-                App::loadDemo(0, world);
-            }
-            PopID();
+            const char* names[] = {
+                    "Simple ground",
+                    "Big box",
+                    "Friction",
+                    "No gravity",
+                    "Restitution",
+            };
 
-            PushID(1);
-            TableNextRow();
-            TableSetColumnIndex(0);
-            Text("Big box");
-            TableSetColumnIndex(1);
-            if (SmallButton("Load")) {
-                App::loadDemo(1, world);
+            for (int i = 0; i < IM_ARRAYSIZE(names); ++i) {
+                PushID(i);
+                TableNextRow();
+                TableSetColumnIndex(0);
+                Text("%s", names[i]);
+                TableSetColumnIndex(1);
+                if (SmallButton("Load")) {
+                    App::loadDemo(i, world);
+                }
+                PopID();
             }
-            PopID();
-
-            PushID(2);
-            TableNextRow();
-            TableSetColumnIndex(0);
-            Text("Ramp");
-            TableSetColumnIndex(1);
-            if (SmallButton("Load")) {
-                App::loadDemo(2, world);
-            }
-            PopID();
-
-            PushID(3);
-            TableNextRow();
-            TableSetColumnIndex(0);
-            Text("Empty big box");
-            TableSetColumnIndex(1);
-            if (SmallButton("Load")) {
-                App::loadDemo(3, world);
-            }
-            PopID();
-
-            PushID(4);
-            TableNextRow();
-            TableSetColumnIndex(0);
-            Text("Rain");
-            TableSetColumnIndex(1);
-            if (SmallButton("Load")) {
-                App::loadDemo(4, world);
-            }
-            PopID();
 
             EndTable();
         }
@@ -287,97 +257,33 @@ void Renderer::drawPhysicsConfig(World *world, bool &paused, float &timeStep) {
     End();
 }
 
-void Renderer::drawBodyConfig(World *world) {
+void Renderer::drawBodyConfig(World *world, BodyProperties *bodyProps) {
     Begin("Bodies");
 
     Text("Initial properties");
 
-    static Vec2f initialPosition = Vec2f();
-    static float initialRotation = 0.0f;
-    static Vec2f initialVelocity = Vec2f();
-    static float initialAngularVelocity = 0.0f;
-
-    DragFloat2("Position", &initialPosition.x);
-    SliderAngle("Rotation", &initialRotation, 0.0f, 360.0f);
-    DragFloat2("Velocity", &initialVelocity.x, 0.01f);
-    DragFloat("Angular velocity", &initialAngularVelocity, 0.01f);
+    SliderAngle("Rotation", &bodyProps->rotation, 0.0f, 360.0f);
+    DragFloat2("Velocity", &bodyProps->velocity.x, 0.01f);
+    DragFloat("Angular velocity", &bodyProps->angularVelocity, 0.01f);
 
     Spacing();
 
-    static bool initialIsStatic = false;
-    static float initialDensity = 1000;
-    static float initialFriction = 0.5f;
-    static float initialRestitution = 0.5f;
-    Checkbox("Is static", &initialIsStatic);
-    DragFloat("Density", &initialDensity, 1.0f, 1, 10000);
-    DragFloat("Friction", &initialFriction, 0.01f, 0, 1);
-    DragFloat("Restitution", &initialRestitution, 0.01f, 0, 1);
+    Checkbox("Is static", &bodyProps->isStatic);
+    DragFloat("Mass", &bodyProps->mass, 0.01f, 0.01f, 1000);
+    DragFloat("Static friction", &bodyProps->staticFriction, 0.01f, 0, 1);
+    DragFloat("Dynamic friction", &bodyProps->dynamicFriction, 0.01f, 0, 1);
+    DragFloat("Restitution", &bodyProps->restitution, 0.01f, 0, 1);
 
     Spacing();
 
     static const char *bodyTypes[] = {
+            "Circle",
             "Triangle",
             "Rectangle",
-            "Convex polygon",
-            "Concave polygon",
-            "Circle",
+            "Polygon",
     };
-    static int currentBodyTypeSelected = 0;
 
-    Combo("Body type", &currentBodyTypeSelected, bodyTypes, IM_ARRAYSIZE(bodyTypes));
-
-    if (Button("Add body")) {
-        Body *body;
-
-        switch (currentBodyTypeSelected) {
-            default:
-            case 0:
-                body = world->create<Triangle>(
-                        Vec2f(-21.65, 12.5),
-                        Vec2f(21.65, 12.5),
-                        Vec2f(0, -25)
-                );
-                break;
-            case 1:
-                body = world->create<Rectangle>(50, 50);
-                break;
-            case 2:
-                body = world->create<Polygon>(std::vector{
-                        Vec2f(0, -25),
-                        Vec2f(-21.65, -12.5),
-                        Vec2f(-21.65, 12.5),
-                        Vec2f(0, 25),
-                        Vec2f(21.65, 12.5),
-                        Vec2f(21.65, -12.5),
-                });
-                break;
-            case 3:
-                body = world->create<Polygon>(std::vector{
-                        Vec2f(0, -25),
-                        Vec2f(-5, -5),
-                        Vec2f(-25, 0),
-                        Vec2f(-5, 5),
-                        Vec2f(0, 25),
-                        Vec2f(5, 5),
-                        Vec2f(25, 0),
-                        Vec2f(5, -5),
-                });
-                break;
-            case 4:
-                body = world->create<Circle>(25);
-                break;
-        }
-
-        body->position = initialPosition;
-        body->rotation = initialRotation;
-        body->velocity = initialVelocity;
-        body->angularVelocity = initialAngularVelocity;
-
-        body->isStatic = initialIsStatic;
-        body->density = initialDensity;
-        body->friction = initialFriction;
-        body->restitution = initialRestitution;
-    }
+    Combo("Body type", (int *) &bodyProps->bodyType, bodyTypes, IM_ARRAYSIZE(bodyTypes));
 
     if (Button("Remove all bodies")) {
         world->clear();
@@ -402,10 +308,10 @@ void Renderer::drawBodyConfig(World *world) {
             Spacing();
 
             Checkbox("Is static", &body->isStatic);
-            DragFloat("Density", &body->density, 1.0f, 1, 10000);
             DragFloat("Mass", &body->mass, 0.01f, 0.01f, 1000);
-            DragFloat("Inertia", &body->inertia, 0.01f, 0, 1);
-            DragFloat("Friction", &body->friction, 0.01f, 0, 1);
+            DragFloat("Inertia", &body->inertia, 1.0f, 1.0f, 999999.0f);
+            DragFloat("Static friction", &body->staticFriction, 0.01f, 0, 1);
+            DragFloat("Dynamic friction", &body->dynamicFriction, 0.01f, 0, 1);
             DragFloat("Restitution", &body->restitution, 0.01f, 0, 1);
 
             if (Button("Remove")) {
@@ -424,6 +330,7 @@ void Renderer::drawBodyConfig(World *world) {
 void Renderer::drawDebugConfig() {
     Begin("Debug");
 
+    Checkbox("Draw bodies", &drawBodies);
     Checkbox("Draw IDs", &drawIDs);
     Checkbox("Draw triangulation", &drawTriangulation);
     Checkbox("Draw normals", &drawBodyNormals);

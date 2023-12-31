@@ -48,6 +48,8 @@ namespace fy {
             bodies.clear();
         }
 
+        Body *getBodyAt(Vec2f position);
+
     private:
         void broadPhase();
 

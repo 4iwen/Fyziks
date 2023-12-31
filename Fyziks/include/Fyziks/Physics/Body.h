@@ -16,11 +16,11 @@ namespace fy {
 
         // properties
         bool isStatic;
-        float density;
         float mass;
         float inertia;
-        float friction;
         float restitution;
+        float staticFriction;
+        float dynamicFriction;
 
         // applied forces
         Vec2f force;

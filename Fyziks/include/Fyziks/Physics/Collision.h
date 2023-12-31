@@ -43,6 +43,5 @@ namespace fy {
                                               Vec2f &contactPoint1, Vec2f &contactPoint2, int &contactCount);
 
         static void pointSegmentDistance(Vec2f point, Vec2f a, Vec2f b, float &distanceSquared, Vec2f &contactPoint);
-
     };
 }

@@ -2,6 +2,7 @@
 
 #include "SFML/Graphics/Color.hpp"
 #include "Fyziks/Fyziks.h"
+#include "BodyProperties.h"
 #include <SFML/Graphics.hpp>
 #include <imgui-SFML.h>
 
@@ -17,7 +18,7 @@ namespace fy {
 
         bool isOpen() const;
 
-        void handleEvents();
+        void handleEvents(World *world, BodyProperties *bodyProps);
 
         void updateCamera();
 
@@ -27,5 +28,8 @@ namespace fy {
 
     private:
         sf::Vector2i lastMousePosition;
+        bool draggingBody = false;
+        Vec2f draggingBodyOffset;
+        Body *pDraggingBody = nullptr;
     };
 }

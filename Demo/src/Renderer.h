@@ -4,6 +4,7 @@
 #include <imgui.h>
 
 #include "Fyziks/Fyziks.h"
+#include "BodyProperties.h"
 
 using namespace fy;
 using namespace ImGui;
@@ -26,7 +27,7 @@ public:
     Renderer(sf::RenderWindow *windowInstance);
 
     // imgui related
-    void drawUI(World *world, bool &paused, float &timeStep);
+    void drawUI(World *world, BodyProperties *bodyProps, bool &paused, float &timeStep);
 
     // fyziks related
     void drawWorld(World *world);
@@ -35,6 +36,7 @@ private:
     sf::RenderWindow *renderWindow;
     sf::Font font;
 
+    bool drawBodies = true;
     bool drawIDs = true;
     bool drawTriangulation = false;
     bool drawBodyNormals = false;
@@ -50,7 +52,7 @@ private:
 
     void drawPhysicsConfig(World *world, bool &paused, float &timeStep);
 
-    void drawBodyConfig(World *world);
+    void drawBodyConfig(World *world, BodyProperties *bodyProps);
 
     // fyziks related
     void drawBody(Body *body) const;

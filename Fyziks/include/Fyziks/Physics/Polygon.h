@@ -14,7 +14,6 @@ namespace fy {
         Polygon(std::vector<Vec2f> vertices) {
             setVertices(std::move(vertices));
 
-            this->mass = calculateMass();
             this->inertia = calculateInertia();
         }
 
@@ -89,59 +88,30 @@ namespace fy {
                 }
             }
 
-
             return {min, max};
         }
 
-        float calculateMass() {
-            float totalArea = 0.0f;
-
-            auto tris = this->getTriangles();
-
-            for (int i = 0; i < tris.size(); ++i) {
-                Vec2f point1 = tris[i][0];
-                Vec2f point2 = tris[i][1];
-                Vec2f point3 = tris[i][2];
-
-                totalArea += PolygonHelper::calculateTriangleArea(point1, point2, point3);
-            }
-
-            return density * totalArea;
-        }
-
+        // find the polygon's moment of inertia, using second moment of area
+        // from:
+        // https://www.physicsforums.com/showthread.php?t=25293
+        // https://stackoverflow.com/questions/3329383/calculating-the-moment-of-inertia-for-a-concave-2d-polygon-relative-to-its-orgin
         float calculateInertia() {
-            float totalInertia = 0.0f;
+            float numerator = 0.0f;
+            float denominator = 0.0f;
 
-            auto tris = this->getTriangles();
+            for (int i = 0; i < vertices.size(); ++i) {
+                Vec2f current = vertices[i];
+                Vec2f next = vertices[(i + 1) % vertices.size()];
 
-            for (int i = 0; i < tris.size(); ++i) {
-                // get triangle points
-                Vec2f point1 = tris[i][0];
-                Vec2f point2 = tris[i][1];
-                Vec2f point3 = tris[i][2];
-
-                // get the centroid of the triangles
-                Vec2f centroid = (point1 + point2 + point3) / 3.0f;
-
-                // calculate the area
-                float area = PolygonHelper::calculateTriangleArea(point1, point2, point3);
-
-                // calculate the mass of triangle
-                float mass = density * area;
-
-                // calculate the distance from the centroid of triangle to the position of polygon
-                float distance = Vec2f::distance(centroid, this->position);
-
-                // add the inertia of one triangle
-                totalInertia += mass * distance * distance;
+                numerator += Vec2f::cross(next, current) * (
+                        Vec2f::dot(next, next) +
+                        Vec2f::dot(next, current) +
+                        Vec2f::dot(current, current)
+                );
+                denominator += Vec2f::cross(next, current);
             }
 
-            Vec2f centroidOfPolygon = PolygonHelper::calculateCentroid(this->getVertices());
-
-            float distToCenterOfMass = Vec2f(this->position - centroidOfPolygon).length();
-            totalInertia += this->mass * distToCenterOfMass * distToCenterOfMass;
-
-            return totalInertia;
+            return (mass / 6) * (numerator / denominator);
         }
     };
 }
