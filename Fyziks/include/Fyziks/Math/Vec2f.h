@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include <cmath>
+#include "Misc.h"
 
 namespace fy {
     class FYZIKS_API Vec2f {
@@ -56,6 +56,11 @@ namespace fy {
             return sqrtf(this->x * this->x + this->y * this->y);
         }
 
+        float lengthSquared() const {
+            return this->x * this->x + this->y * this->y;
+        }
+
+
         bool operator<(Vec2f other) const {
             return this->length() < other.length();
         }
@@ -93,6 +98,16 @@ namespace fy {
             float dy = vec1.y - vec2.y;
             return sqrtf(dx * dx + dy * dy);
         }
+
+        static float distanceSquared(const Vec2f &vec1, const Vec2f &vec2) {
+            float dx = vec1.x - vec2.x;
+            float dy = vec1.y - vec2.y;
+            return dx * dx + dy * dy;
+        }
+
+        static bool nearlyEqual(const Vec2f &lhs, const Vec2f &rhs, float epsilon = 0.0001f) {
+            return Misc::nearlyEqual(lhs.x, rhs.x, epsilon) && Misc::nearlyEqual(lhs.y, rhs.y, epsilon);
+        }
     };
 
     inline Vec2f operator+(const Vec2f &vec1, const Vec2f &vec2) {
@@ -103,11 +118,11 @@ namespace fy {
         return {vec1.x - vec2.x, vec1.y - vec2.y};
     }
 
-    inline Vec2f operator*(const Vec2f &vec, const float scalar) {
+    inline Vec2f operator*(const Vec2f &vec, float scalar) {
         return {vec.x * scalar, vec.y * scalar};
     }
 
-    inline Vec2f operator*(const float scalar, const Vec2f &vec) {
+    inline Vec2f operator*(float scalar, const Vec2f &vec) {
         return {vec.x * scalar, vec.y * scalar};
     }
 

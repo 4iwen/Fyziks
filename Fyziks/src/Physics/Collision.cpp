@@ -27,8 +27,8 @@ namespace fy {
 
     // check for collision between two polygons
     bool Collision::intersectPolygons(Polygon *pol1, Polygon *pol2, Vec2f &normal, float &depth) {
-        std::vector<std::vector<Vec2f>> triangles1 = pol1->getTranslatedTriangles();
-        std::vector<std::vector<Vec2f>> triangles2 = pol2->getTranslatedTriangles();
+        std::vector<std::vector<Vec2f>> triangles1 = pol1->getTransformedTriangles();
+        std::vector<std::vector<Vec2f>> triangles2 = pol2->getTransformedTriangles();
 
         bool isIntersecting = false;
         float maxDepth = std::numeric_limits<float>::min();
@@ -207,7 +207,7 @@ namespace fy {
 
     // check for collision between polygon and circle
     bool Collision::intersectPolygonCircle(Polygon *pol, Circle *cir, Vec2f &normal, float &depth, bool swapped) {
-        std::vector<std::vector<Vec2f>> triangles = pol->getTranslatedTriangles();
+        std::vector<std::vector<Vec2f>> triangles = pol->getTransformedTriangles();
 
         bool isIntersecting = false;
         float maxDepth = -std::numeric_limits<float>::max();
@@ -357,5 +357,150 @@ namespace fy {
         }
 
         return true;
+    }
+
+    void Collision::findContactPoints(Body *body1, Body *body2,
+                                      Vec2f &contactPoint1, Vec2f &contactPoint2, int &contactCount) {
+        // try to cast to either polygon or circle for both bodies
+        auto polygon1 = body1->tryCast<Polygon>();
+        auto polygon2 = body2->tryCast<Polygon>();
+        auto circle1 = body1->tryCast<Circle>();
+        auto circle2 = body2->tryCast<Circle>();
+
+        // find out what shapes we're dealing with
+        if (polygon1 && polygon2) {
+            findContactPointsPolygons(polygon1, polygon2, contactPoint1, contactPoint2, contactCount);
+        } else if (circle1 && circle2) {
+            findContactPointCircles(circle1, circle2, contactPoint1);
+            contactCount = 1;
+        } else if (polygon1 && circle2) {
+            findContactPointPolygonCircle(polygon1, circle2, contactPoint1);
+            contactCount = 1;
+        } else if (polygon2 && circle1) {
+            findContactPointPolygonCircle(polygon2, circle1, contactPoint1);
+            contactCount = 1;
+        }
+    }
+
+    // method for finding the contact point between two circles
+    void Collision::findContactPointCircles(Circle *cir1, Circle *cir2, Vec2f &contactPoint) {
+        // make a vector that points from one circle to the other
+        Vec2f direction = cir2->position - cir1->position;
+
+        // normalize it, then multiply it by the circle's radius to get the contact point
+        direction.normalize();
+        contactPoint = cir1->position + direction * cir1->radius;
+    }
+
+    // method for finding the contact point between a polygon and a circle
+    void Collision::findContactPointPolygonCircle(Polygon *pol, Circle *cir, Vec2f &contactPoint) {
+        // get transformed vertices of the polygon
+        auto transformedVertices = pol->getTransformedVertices();
+
+        // variable for storing the smallest distance
+        float minDistanceSquared = std::numeric_limits<float>::max();
+
+        for (int i = 0; i < transformedVertices.size(); ++i) {
+            // get the line segment
+            Vec2f current = transformedVertices[i];
+            Vec2f next = transformedVertices[(i + 1) % transformedVertices.size()];
+
+            // temp variables for storing the distance and contact point
+            float distanceSquared;
+            Vec2f contact;
+
+            // find the contact and distance for the current line segment
+            pointSegmentDistance(cir->position, current, next, distanceSquared, contact);
+
+            // if the distance is smaller, we found a new point that is closer
+            if (distanceSquared < minDistanceSquared) {
+                minDistanceSquared = distanceSquared;
+                contactPoint = contact;
+            }
+        }
+    }
+
+    void Collision::findContactPointsPolygons(Polygon *pol1, Polygon *pol2, Vec2f &contactPoint1, Vec2f &contactPoint2,
+                                              int &contactCount) {
+        auto pol1TransformedVertices = pol1->getTransformedVertices();
+        auto pol2TransformedVertices = pol2->getTransformedVertices();
+
+        float minDistanceSquared = std::numeric_limits<float>::max();
+
+        for (int i = 0; i < pol1TransformedVertices.size(); ++i) {
+            Vec2f point = pol1TransformedVertices[i];
+
+            for (int j = 0; j < pol2TransformedVertices.size(); ++j) {
+                Vec2f current = pol2TransformedVertices[j];
+                Vec2f next = pol2TransformedVertices[(j + 1) % pol2TransformedVertices.size()];
+
+                float distanceSquared;
+                Vec2f contact;
+
+                pointSegmentDistance(point, current, next, distanceSquared, contact);
+
+                if (Misc::nearlyEqual(distanceSquared, minDistanceSquared)) {
+                    if (!Vec2f::nearlyEqual(contact, contactPoint1)) {
+                        contactCount = 2;
+                        contactPoint2 = contact;
+                    }
+                } else if (distanceSquared < minDistanceSquared) {
+                    minDistanceSquared = distanceSquared;
+                    contactCount = 1;
+                    contactPoint1 = contact;
+                }
+            }
+        }
+
+        for (int i = 0; i < pol2TransformedVertices.size(); ++i) {
+            Vec2f point = pol2TransformedVertices[i];
+
+            for (int j = 0; j < pol1TransformedVertices.size(); ++j) {
+                Vec2f current = pol1TransformedVertices[j];
+                Vec2f next = pol1TransformedVertices[(j + 1) % pol1TransformedVertices.size()];
+
+                float distanceSquared;
+                Vec2f contact;
+
+                pointSegmentDistance(point, current, next, distanceSquared, contact);
+
+                if (Misc::nearlyEqual(distanceSquared, minDistanceSquared)) {
+                    if (!Vec2f::nearlyEqual(contact, contactPoint1)) {
+                        contactCount = 2;
+                        contactPoint2 = contact;
+                    }
+                } else if (distanceSquared < minDistanceSquared) {
+                    minDistanceSquared = distanceSquared;
+                    contactCount = 1;
+                    contactPoint1 = contact;
+                }
+            }
+        }
+    }
+
+    void Collision::pointSegmentDistance(Vec2f point, Vec2f a, Vec2f b, float &distanceSquared, Vec2f &contactPoint) {
+        // get the vector of the line segment
+        Vec2f ab = b - a;
+        // get the vector pointing from a to the point
+        Vec2f aPoint = point - a;
+
+        // project aPoint on ab
+        float proj = Vec2f::dot(aPoint, ab);
+        // get the length squared
+        float abLengthSquared = ab.lengthSquared();
+        // calculate the distance of the point from the line segment
+        float distance = proj / abLengthSquared;
+
+        // figure out the contact point
+        if (distance <= 0.0f) {
+            contactPoint = a;
+        } else if (distance >= 1.0f) {
+            contactPoint = b;
+        } else {
+            contactPoint = a + ab * distance;
+        }
+
+        // get the distance squared for figuring out which point is the closest
+        distanceSquared = Vec2f::distanceSquared(point, contactPoint);
     }
 }

@@ -9,9 +9,9 @@ namespace fy {
 
         isStatic = false;
         mass = 1.0f;
-        inertia = 0.5f;
-        friction = 0.5f;
         restitution = 0.5f;
+        staticFriction = 0.6f;
+        dynamicFriction = 0.4f;
 
         force = Vec2f();
         torque = 0.0f;
@@ -22,18 +22,18 @@ namespace fy {
             return;
         }
 
-        // Newton's law of motion
-        // Vec2f acceleration = force / mass;
-        // velocity += acceleration * deltaTime;
-        velocity += gravity * deltaTime;
-        position += velocity * deltaTime;
+        // apply gravity
+        force += gravity * mass;
 
-        // Newton's law of inertia
+        // apply force and torque
+        velocity += force * (deltaTime * this->getInverseMass());
+        angularVelocity += torque * (deltaTime * this->getInverseInertia());
+
+        // apply velocity
+        position += velocity * deltaTime;
         rotation += angularVelocity * deltaTime;
 
-        // body->velocity += deltaTime * (gravity + body->getInverseMass() * body->force);
-        // angularVelocity += deltaTime * getInverseInertia() * torque;
-
+        // reset force and torque
         force = Vec2f();
         torque = 0.0f;
     }

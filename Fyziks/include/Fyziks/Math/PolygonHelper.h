@@ -9,8 +9,8 @@ namespace fy {
     public:
         static std::vector<std::vector<Vec2f>> triangulate(std::vector<Vec2f> vertices);
 
-        static bool
-        isPointInsideTriangle(const Vec2f &point, const Vec2f &prev, const Vec2f &current, const Vec2f &next);
+        static bool isPointInsideTriangle(const Vec2f &point,
+                                          const Vec2f &prev, const Vec2f &current, const Vec2f &next);
 
     private:
 

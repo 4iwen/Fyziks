@@ -4,11 +4,13 @@
 #include <imgui.h>
 
 #include "Fyziks/Fyziks.h"
+#include "BodyProperties.h"
 
 using namespace fy;
 using namespace ImGui;
 
 #define COLOR_RED                   sf::Color(255,   0,   0, 255)
+#define COLOR_TRANSPARENT_RED       sf::Color(255,   0,   0, 128)
 #define COLOR_GREEN                 sf::Color(  0, 255,   0, 255)
 #define COLOR_BLUE                  sf::Color(  0,   0, 255, 255)
 #define COLOR_YELLOW                sf::Color(255, 255,   0, 255)
@@ -25,7 +27,7 @@ public:
     Renderer(sf::RenderWindow *windowInstance);
 
     // imgui related
-    void drawUI(World *world, bool &paused, float &timeStep);
+    void drawUI(World *world, BodyProperties *bodyProps, bool &paused, float &timeStep);
 
     // fyziks related
     void drawWorld(World *world);
@@ -34,13 +36,15 @@ private:
     sf::RenderWindow *renderWindow;
     sf::Font font;
 
+    bool drawBodies = true;
     bool drawIDs = true;
     bool drawTriangulation = false;
     bool drawBodyNormals = false;
     bool drawAABBs = false;
+    bool drawContactPoints = false;
 
     // imgui related
-    void drawMetrics();
+    void drawMetrics(World *world);
 
     void drawDemos(World *world);
 
@@ -48,7 +52,7 @@ private:
 
     void drawPhysicsConfig(World *world, bool &paused, float &timeStep);
 
-    void drawBodyConfig(World *world);
+    void drawBodyConfig(World *world, BodyProperties *bodyProps);
 
     // fyziks related
     void drawBody(Body *body) const;
@@ -64,4 +68,6 @@ private:
     void drawNormal(const Vec2f &current, const Vec2f &next);
 
     void drawAABB(Body *body);
+
+    void drawContactPoint(CollisionManifold &contact);
 };

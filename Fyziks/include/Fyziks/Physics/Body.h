@@ -18,8 +18,9 @@ namespace fy {
         bool isStatic;
         float mass;
         float inertia;
-        float friction;
         float restitution;
+        float staticFriction;
+        float dynamicFriction;
 
         // applied forces
         Vec2f force;
@@ -56,7 +57,7 @@ namespace fy {
         }
 
         float getInverseInertia() const {
-            if (inertia != 0) {
+            if (!isStatic) {
                 return 1.0f / inertia;
             }
 
