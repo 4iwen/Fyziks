@@ -20,8 +20,8 @@ set(
 
 include_directories(
         ${IMGUI_DIR}
+        ${SFML_INCLUDE_DIR}
         ../Fyziks/include
-        ../vendor/SFML/include
         ../vendor/imgui-sfml
 )
 

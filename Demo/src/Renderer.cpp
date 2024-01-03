@@ -6,7 +6,6 @@
 Renderer::Renderer(sf::RenderWindow *windowInstance) {
     renderWindow = windowInstance;
     font.loadFromMemory(ProggyClean_ttf_char, ProggyClean_ttf_size);
-    font.setSmooth(false);
 }
 
 void Renderer::drawWorld(World *world) {
