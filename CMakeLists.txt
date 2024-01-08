@@ -19,8 +19,6 @@ add_subdirectory(Fyziks)
 if (FYZIKS_BUILD_DEMO)
     # dependencies
     find_package(SFML 2.5.1 COMPONENTS graphics window system REQUIRED)
-    set(SFML_BUILD_AUDIO FALSE)
-    set(SFML_BUILD_NETWORK FALSE)
 
     set(IMGUI_SFML_FIND_SFML OFF)
     set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vendor/imgui)
