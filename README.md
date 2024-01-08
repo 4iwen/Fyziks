@@ -4,7 +4,7 @@
 
 ## Features
 
-- Collision detection & resolution (SAT)
+- Rigid body collision detection & resolution (SAT)
   - Circles & polygons (triangles, rectangles, custom polygons)
 - Body properties
   - Position, rotation
@@ -23,7 +23,7 @@
 
 #### Release
 
-You can find the latest release on the [releases](https://github.com/4iwen/Fyziks/releases) page
+~~You can find the latest release on the [releases](https://github.com/4iwen/Fyziks/releases) page~~ (soon)
 
 #### Building
 
@@ -38,7 +38,10 @@ You can find the latest release on the [releases](https://github.com/4iwen/Fyzik
            - `sudo apt install gcc`
            - `brew install gcc`
 4. Run `build.sh` or `build_mingw.bat` or `build_visual_studio.bat`
-5. Built files are located in the bin/ folder
+5. Built files are located in the `bin/` folder
+
+> **_NOTE:_**  The demo requires SFML to be installed as a library on your system or PATH,
+> otherwise you will need to copy the SFML DLLs to the `bin/` folder or compile and link SFML as static.
 
 ### Usage
 
