@@ -40,7 +40,7 @@
 4. Run `build.sh` or `build_mingw.bat` or `build_visual_studio.bat`
 5. Built files are located in the `bin/` folder
 
-> **_NOTE:_**  The demo requires SFML to be installed as a library on your system or PATH,
+> **_NOTE:_**  The demo requires SFML to be installed as a library on your system or in PATH,
 > otherwise you will need to copy the SFML DLLs to the `bin/` folder or compile and link SFML as static.
 
 ### Usage
