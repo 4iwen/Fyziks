@@ -23,13 +23,13 @@
 
 #### Release
 
-~~You can find the latest release on the [releases](https://github.com/4iwen/Fyziks/releases) page~~ (soon)
+You can find the latest release on the [releases](https://github.com/4iwen/Fyziks/releases) page
 
 #### Building
 
 1. Clone the repository recursively
    - `git clone https://github.com/4iwen/Fyziks --recursive`
-2. Install [CMake](https://cmake.org/) and [SFML](https://www.sfml-dev.org/)
+2. Install [CMake](https://cmake.org/)
 3. Install a C++ compiler of your choice
    - Windows
        - [MinGW](https://mingw-w64.org/) or [MSVC](https://visualstudio.microsoft.com/downloads/) (comes with Visual Studio)
@@ -39,9 +39,6 @@
            - `brew install gcc`
 4. Run `build.sh` or `build_mingw.bat` or `build_visual_studio.bat`
 5. Built files are located in the `bin/` folder
-
-> **_NOTE:_**  The demo requires SFML to be installed as a library on your system or in PATH,
-> otherwise you will need to copy the SFML DLLs to the `bin/` folder or compile and link SFML as static.
 
 ### Usage
 
