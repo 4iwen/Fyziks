@@ -1,0 +1,85 @@
+name: Multiplatform build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build'
+        required: true
+        default: 'latest'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        build_type: [ Debug, Release ]
+        c_compiler: [ gcc, clang, cl ]
+        include:
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+          - os: macos-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: macos-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+          - os: macos-latest
+            c_compiler: cl
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libudev-dev libgl1-mesa-dev libxrandr-dev libx11-dev libxcursor-dev
+
+      - name: Install Windows dependencies
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install 7zip
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} -DSFML_DIR=C:/SFML/lib/cmake/SFML ..
+
+      - name: Build
+        run: cmake --build build/ --config ${{ matrix.build_type }}
+
+      - name: Zip artifacts
+        run: |
+          cd bin
+          7z a ../Fyziks-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.c_compiler }}.zip .
+
+      - name: Upload files
+        uses: svenstaro/upload-release-action@v2
+        with:
+          tag: ${{ github.event.inputs.tag }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Fyziks-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.c_compiler }}.zip
+          asset_name: Fyziks-${{ matrix.build_type }}-${{ matrix.os }}-${{ matrix.c_compiler }}.zip
+          overwrite: true
