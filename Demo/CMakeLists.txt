@@ -20,9 +20,9 @@ set(
 
 include_directories(
         ${IMGUI_DIR}
-        ${SFML_INCLUDE_DIR}
         ../Fyziks/include
         ../vendor/imgui-sfml
+        ../vendor/SFML/include
 )
 
 add_executable(
