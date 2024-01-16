@@ -33,10 +33,9 @@ You can find the latest release on the [releases](https://github.com/4iwen/Fyzik
 3. Install a C++ compiler of your choice
    - Windows
        - [MinGW](https://mingw-w64.org/) or [MSVC](https://visualstudio.microsoft.com/downloads/) (comes with Visual Studio)
-   - Linux & macOS
+   - Linux
        - gcc
-           - `sudo apt install gcc`
-           - `brew install gcc`
+           - `sudo apt install build-essential`
 4. Run `build.sh` or `build_mingw.bat` or `build_visual_studio.bat`
 5. Built files are located in the `bin/` folder
 
