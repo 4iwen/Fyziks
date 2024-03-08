@@ -170,8 +170,8 @@ void Renderer::drawID(Vec2f pos, int id) const {
 
 void Renderer::drawUI(World *world, BodyProperties *bodyProps, bool &paused, float &timeStep) {
     // make the whole window dock-able
-    DockSpaceOverViewport(GetMainViewport(),
-                          ImGuiDockNodeFlags_PassthruCentralNode);
+    DockSpaceOverViewport(GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+
     // metrics
     drawMetrics(world);
     // demos
@@ -207,7 +207,7 @@ void Renderer::drawDemos(World *world) {
     Begin("Examples");
     if (TreeNode("Basic")) {
         if (BeginTable("table1", 2)) {
-            const char* names[] = {
+            const char *names[] = {
                     "Simple ground",
                     "Big box",
                     "Friction",

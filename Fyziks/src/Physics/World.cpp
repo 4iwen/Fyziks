@@ -1,6 +1,7 @@
 #include <algorithm>
 #include "Fyziks/Physics/World.h"
 #include "Fyziks/Physics/Collision.h"
+#include <stdio.h>
 
 namespace fy {
     void World::step(float deltaTime) {

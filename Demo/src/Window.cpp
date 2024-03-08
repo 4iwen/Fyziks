@@ -11,7 +11,8 @@ Window::Window(const std::string &title, const sf::Vector2u size) {
             sf::VideoMode(size.x, size.y), title, sf::Style::Default,
             sf::ContextSettings(0, 0, 8));
 
-    this->view = sf::View(sf::FloatRect(0, 0, 0, 0));
+    this->view = sf::View(sf::FloatRect(0, 0, (float) size.x, (float) size.y));
+    view.setCenter(0, 0);
     renderWindow->setView(view);
     lastMousePosition = sf::Mouse::getPosition();
 
@@ -118,6 +119,7 @@ void Window::updateCamera() {
         sf::Vector2f offset =
                 renderWindow->mapPixelToCoords(currentMousePosition) -
                 renderWindow->mapPixelToCoords(lastMousePosition);
+
         // move the view / camera
         view.move(-offset);
         renderWindow->setView(view);

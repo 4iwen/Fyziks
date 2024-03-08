@@ -48,7 +48,16 @@ namespace fy {
             bodies.clear();
         }
 
-        Body *getBodyAt(Vec2f position);
+        bool areBodiesColliding(Body *body1, Body *body2) const {
+            for (const auto &contact: contactPoints) {
+                if ((contact.body1 == body1 && contact.body2 == body2) ||
+                    (contact.body1 == body2 && contact.body2 == body1)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
     private:
         void broadPhase();
@@ -59,6 +68,6 @@ namespace fy {
 
         void applyForces(float deltaTime);
 
-        void separateBodies(Body*body1, Body*body2, Vec2f mtv);
+        void separateBodies(Body *body1, Body *body2, Vec2f mtv);
     };
 }
