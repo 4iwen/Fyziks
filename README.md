@@ -62,10 +62,24 @@ int main()
     body->staticFriction = 0.5f;
     body->dynamicFriction = 0.3f;
     
+    // Create a polygon
+    auto otherBody = world->create<Polygon>(std::vector<Vec2f>{
+        Vec2f(0.0f, 0.0f),
+        Vec2f(50.0f, 0.0f),
+        Vec2f(25.0f, 50.0f)
+    });
+    otherBody->position = Vec2f(200.0f, 100.0f);
+    
     while (true)
     {
         // Update the world with a time step
         world.step(1.0f / 60.0f);
+        
+        // Check if two bodies are colliding
+        if (world.areBodiesColliding(body, otherBody))
+        {
+            // ...
+        }
     
         // Draw the world
         // ...

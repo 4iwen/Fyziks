@@ -28,8 +28,5 @@ namespace fy {
 
     private:
         sf::Vector2i lastMousePosition;
-        bool draggingBody = false;
-        Vec2f draggingBodyOffset;
-        Body *pDraggingBody = nullptr;
     };
 }
