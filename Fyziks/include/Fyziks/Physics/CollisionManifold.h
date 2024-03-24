@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include "Fyziks/Physics/Body.h"
+#include "Fyziks/Math/Body.h"
 
 #include <vector>
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include "Body.h"
+#include "Fyziks/Math/Body.h"
 #include "CollisionManifold.h"
 #include "ContactPair.h"
 

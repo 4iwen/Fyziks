@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Fyziks/Api.h"
-#include "Fyziks/Physics/Polygon.h"
-#include "Fyziks/Physics/Circle.h"
+#include "Fyziks/Math/Polygon.h"
+#include "Fyziks/Math/Circle.h"
 
 namespace fy {
     class FYZIKS_API Collision {
