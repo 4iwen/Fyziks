@@ -3,7 +3,7 @@
 #include <memory>
 #include "Fyziks/Api.h"
 #include "Fyziks/Math/Vec2f.h"
-#include "Fyziks/Physics/AABB.h"
+#include "AABB.h"
 
 namespace fy {
     class FYZIKS_API Body {

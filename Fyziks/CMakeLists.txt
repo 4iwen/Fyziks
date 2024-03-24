@@ -1,7 +1,7 @@
 set(
         SOURCE_FILES
         src/Physics/World.cpp
-        src/Physics/Body.cpp
+        src/Math/Body.cpp
         src/Physics/Collision.cpp
         src/Math/PolygonHelper.cpp
 )

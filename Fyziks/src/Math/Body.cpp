@@ -1,4 +1,4 @@
-#include "Fyziks/Physics/Body.h"
+#include "Fyziks/Math/Body.h"
 
 namespace fy {
     Body::Body() {

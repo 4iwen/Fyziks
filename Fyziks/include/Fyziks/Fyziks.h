@@ -12,10 +12,10 @@
 #include "Fyziks/Math/PolygonHelper.h"
 
 // world, objects and simulation
-#include "Fyziks/Physics/Body.h"
+#include "Fyziks/Math/Body.h"
 #include "Fyziks/Physics/World.h"
-#include "Fyziks/Physics/Rectangle.h"
-#include "Fyziks/Physics/Circle.h"
-#include "Fyziks/Physics/Polygon.h"
-#include "Fyziks/Physics/Triangle.h"
+#include "Fyziks/Math/Rectangle.h"
+#include "Fyziks/Math/Circle.h"
+#include "Fyziks/Math/Polygon.h"
+#include "Fyziks/Math/Triangle.h"
 #include "Fyziks/Physics/Collision.h"
