@@ -1,5 +1,7 @@
 # Fyziks - 2D Physics Engine
 
+![Showcase](showcase.png)
+
 > This project is for educational purposes only, for a more complete and optimized physics engine, please refer to [Box2D](https://box2d.org/)
 
 ## Features
